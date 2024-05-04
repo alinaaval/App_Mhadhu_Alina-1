@@ -5,10 +5,10 @@ class Task:
     def __init__(self, name, priority, date):
         self.name = name
         self.priority = priority
-        self.date = date
+        self.date = datetime.strptime(date, "%Y-%m-%d")
     
     def __repr__(self):
-        return f"Task: {self.name}, Priority: {self.priority}, Date: {self.date}"
+        return f"Task: {self.name}, Priority: {self.priority}, Date: {self.date.strftime('%Y-%m-%d')}"
 
 class DailyPlanner:
     def __init__(self):
@@ -27,11 +27,12 @@ class DailyPlanner:
                 del self.tasks[date]
 
     def display_tasks(self, date):
-        if date not in self.tasks or not self.tasks[date]:
+        date_obj = datetime.strptime(date, "%Y-%m-%d")
+        if date_obj not in self.tasks or not self.tasks[date_obj]:
             print(f"Keine Aufgaben am {date} vorhanden.")
         else:
             print(f"Aufgaben am {date} sortiert nach Priorität:")
-            for task in self.tasks[date]:
+            for task in self.tasks[date_obj]:
                 print(task)
 
 class User:
@@ -106,7 +107,7 @@ class CalendarApp:
                     print(f"Aufgabe '{name}' am {date} entfernt.")
 
             elif choice == "5":
-                if not self.logged_in_user:
+                if nicht self.logged_in_user:
                     print("Sie müssen sich anmelden, um Aufgaben anzuzeigen.")
                 else:
                     date = input("Aufgabendatum eingeben (YYYY-MM-DD): ")
