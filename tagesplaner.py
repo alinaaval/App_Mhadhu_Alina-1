@@ -1,134 +1,142 @@
+import streamlit as st
+import pandas as pd
+import calendar
 from datetime import datetime
-from collections import defaultdict
 
-class Task:
-    def __init__(self, name, priority, date):
-        self.name = name
-        self.priority = priority
-        # Datum in ein datetime-Objekt konvertieren
-        self.date = datetime.strptime(date, "%Y-%m-%d")
-    
-    def __repr__(self):
-        return f"Task: {self.name}, Priority: {self.priority}, Date: {self.date.strftime('%Y-%m-%d')}"
+# Placeholder for user data, tasks, and events (for demo purposes)
+users = pd.DataFrame(columns=['username', 'password'])
+tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
+events = pd.DataFrame(columns=['username', 'date', 'description'])
 
-class DailyPlanner:
-    def __init__(self):
-        # defaultdict, um Aufgaben nach Datum zu speichern
-        self.tasks = defaultdict(list)
+def authenticate(username, password):
+    """Check if the user credentials are valid."""
+    if username in users['username'].values:
+        user_data = users[users['username'] == username]
+        return user_data['password'].iloc[0] == password
+    return False
 
-    def add_task(self, name, priority, date):
-        task = Task(name, priority, date)
-        self.tasks[date].append(task)
-        # Aufgaben nach Priorität sortieren
-        self.tasks[date].sort(key=lambda x: x.priority)
+def add_user(username, password):
+    """Add a new user to the DataFrame."""
+    global users
+    if username not in users['username'].values:
+        users = users.append({'username': username, 'password': password}, ignore_index=True)
+        return True
+    return False
 
-    def remove_task(self, date, name):
-        if date in self.tasks:
-            self.tasks[date] = [task for task in self.tasks[date] if task.name != name]
-            # Datum entfernen, wenn keine Aufgaben mehr vorhanden
-            if not self.tasks[date]:
-                del self.tasks[date]
+def add_task(username, date, description, importance):
+    """Add a new task to the DataFrame."""
+    global tasks
+    tasks = tasks.append({
+        'username': username, 'date': date, 'description': description, 'importance': importance
+    }, ignore_index=True)
 
-    def display_tasks(self, date):
-        # Datum in ein datetime-Objekt konvertieren
-        date_obj = datetime.strptime(date, "%Y-%m-%d")
-        if date_obj not in self.tasks or not self.tasks[date_obj]:
-            print(f"Keine Aufgaben am {date} vorhanden.")
-        else:
-            print(f"Aufgaben am {date} sortiert nach Priorität:")
-            for task in self.tasks[date_obj]:
-                print(task)
+def add_event(username, date, description):
+    """Add a new event to the DataFrame."""
+    global events
+    events = events.append({
+        'username': username, 'date': date, 'description': description
+    }, ignore_index=True)
 
-class User:
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
-        self.daily_planner = DailyPlanner()
+def get_tasks_by_date(username, date):
+    """Retrieve tasks for the logged-in user for a specific date."""
+    return tasks[(tasks['username'] == username) & (tasks['date'] == date)]
 
-class CalendarApp:
-    def __init__(self):
-        self.users = {}
-        self.logged_in_user = None
+def get_events_by_date(username, date):
+    """Retrieve events for the logged-in user for a specific date."""
+    return events[(events['username'] == username) & (events['date'] == date)]
 
-    def register_user(self, username, password):
-        if username in self.users:
-            print("Benutzername bereits vorhanden. Bitte wählen Sie einen anderen.")
-        else:
-            self.users[username] = User(username, password)
-            print("Registrierung erfolgreich!")
+def calendar_view(year, month):
+    """Create a calendar view for the given month and year."""
+    cal = calendar.monthcalendar(year, month)
+    return cal
+def app():
+    # Custom CSS for pastel pink gradient
+    st.markdown("""
+        <style>
+        html {
+            height: 100%;
+        }
+        body {
+            background: linear-gradient(180deg, #FFC0CB, #FFB6C1, #FF69B4, #FF1493, #FFC0CB);
+            color: #4B0082;
+            height: 100%;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
-    def login(self, username, password):
-        if username in self.users and self.users[username].password == password:
-            self.logged_in_user = self.users[username]
-            print(f"Willkommen, {username}!")
-        else:
-            print("Ungültiger Benutzername oder Passwort.")
+    st.title("Task and Event Manager")
 
-    def logout(self):
-        if self.logged_in_user:
-            print(f"Auf Wiedersehen, {self.logged_in_user.username}!")
-            self.logged_in_user = None
-        else:
-            print("Sie sind derzeit nicht angemeldet.")
+    if 'logged_in' not in st.session_state or not st.session_state['logged_in']:
+        with st.form("login"):
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            login = st.form_submit_button("Login")
+            register = st.form_submit_button("Register")
 
-    def run(self):
-        while True:
-            print("\n1. Anmelden")
-            print("2. Abmelden")
-            print("3. Aufgabe hinzufügen")
-            print("4. Aufgabe entfernen")
-            print("5. Aufgaben anzeigen")
-            print("6. Benutzer registrieren")
-            print("7. Beenden")
-
-            choice = input("Wählen Sie eine Option (1-7): ")
-
-            if choice == "1":
-                username = input("Benutzername: ")
-                password = input("Passwort: ")
-                self.login(username, password)
-            
-            elif choice == "2":
-                self.logout()
-            
-            elif choice == "3":
-                if not self.logged_in_user:
-                    print("Sie müssen sich anmelden, um eine Aufgabe hinzuzufügen.")
-                else:
-                    name = input("Aufgabennamen eingeben: ")
-                    priority = int(input("Priorität der Aufgabe eingeben (niedrigere Zahl = höhere Priorität): "))
-                    date = input("Aufgabendatum eingeben (YYYY-MM-DD): ")
-                    self.logged_in_user.daily_planner.add_task(name, priority, date)
-                    print(f"Aufgabe '{name}' mit Priorität {priority} für den {date} hinzugefügt.")
-
-            elif choice == "4":
-                if not self.logged_in_user:
-                    print("Sie müssen sich anmelden, um eine Aufgabe zu entfernen.")
-                else:
-                    date = input("Aufgabendatum eingeben (YYYY-MM-DD): ")
-                    name = input("Aufgabennamen eingeben, um ihn zu entfernen: ")
-                    self.logged_in_user.daily_planner.remove_task(date, name)
-                    print(f"Aufgabe '{name}' am {date} entfernt.")
-
-            elif choice == "5":
-                if not self.logged_in_user:
-                    print("Sie müssen sich anmelden, um Aufgaben anzuzeigen.")
-                else:
-                    date = input("Aufgabendatum eingeben (YYYY-MM-DD): ")
-                    self.logged_in_user.daily_planner.display_tasks(date)
-
-            elif choice == "6":
-                username = input("Benutzername: ")
-                password = input("Passwort: ")
-                self.register_user(username, password)
-            
-            elif choice == "7":
-                print("Programm wird beendet.")
-                break
-            
+        if login:
+            if authenticate(username, password):
+                st.session_state['logged_in'] = True
+                st.session_state['username'] = username
             else:
-                print("Ungültige Option. Bitte wählen Sie eine gültige Option (1-7).")
+                st.error("Invalid username or password")
+ if register:
+            if add_user(username, password):
+                st.success("User registered. You can now login.")
+            else:
+                st.error("Username already taken")
 
-if __name__ == "__main__":
-    app = CalendarApp()
-    app.run()
+    else:
+        # Display month navigation and calendar
+        selected_date = st.session_state.get('selected_date', datetime.today())
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("Previous"):
+                selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
+                st.session_state['selected_date'] = selected_date
+        with col2:
+            st.write(selected_date.strftime("%B %Y"))
+        with col3:
+            if st.button("Next"):
+                selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
+                st.session_state['selected_date'] = selected_date
+
+        # Show calendar
+        cal = calendar_view(selected_date.year, selected_date.month)
+        for week in cal:
+            cols = st.columns(7)
+            for day, col in zip(week, cols):
+                with col:
+                    if day != 0:
+                        date_str = f"{selected_date.year}-{selected_date.month:02}-
+    {day:02}"
+                        if st.button(f"{day}", key=date_str):
+                            st.session_state['current_date'] = date_str
+
+        # Show selected day details
+        if 'current_date' in st.session_state:
+            current_date = st.session_state['current_date']
+            st.subheader(f"Details for {current_date}")
+            user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
+            user_events = get_events_by_date(st.session_state['username'], current_date)
+            if not user_tasks.empty:
+                st.write("Tasks:")
+                st.dataframe(user_tasks)
+            if not user_events.empty:
+                st.write("Events:")
+                st.dataframe(user_events)
+
+            with st.form("add_event"):
+                event_desc = st.text_input("Event Description")
+                add_event_btn = st.form_submit_button("Add Event")
+            
+            if add_event_btn:
+                add_event(st.session_state['username'], current_date, event_desc)
+                st.success("Event added successfully")
+
+        # Logout button
+        if st.button("Logout"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.info("Logged out successfully.")
+# Note: Uncomment the following line to run this script directly in your local environment.
+# app()
