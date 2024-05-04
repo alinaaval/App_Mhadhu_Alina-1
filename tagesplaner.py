@@ -49,6 +49,7 @@ def calendar_view(year, month):
     """Create a calendar view for the given month and year."""
     cal = calendar.monthcalendar(year, month)
     return cal
+
 def app():
     # Custom CSS for pastel pink gradient
     st.markdown("""
@@ -73,17 +74,18 @@ def app():
             login = st.form_submit_button("Login")
             register = st.form_submit_button("Register")
 
-        if login:
-            if authenticate(username, password):
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = username
-            else:
-                st.error("Invalid username or password")
- if register:
-            if add_user(username, password):
-                st.success("User registered. You can now login.")
-            else:
-                st.error("Username already taken")
+            if login:
+                if authenticate(username, password):
+                    st.session_state['logged_in'] = True
+                    st.session_state['username'] = username
+                else:
+                    st.error("Invalid username or password")
+
+            if register:
+                if add_user(username, password):
+                    st.success("User registered. You can now login.")
+                else:
+                    st.error("Username already taken")
 
     else:
         # Display month navigation and calendar
@@ -107,8 +109,7 @@ def app():
             for day, col in zip(week, cols):
                 with col:
                     if day != 0:
-                        date_str = f"{selected_date.year}-{selected_date.month:02}-
-    {day:02}"
+                        date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
                         if st.button(f"{day}", key=date_str):
                             st.session_state['current_date'] = date_str
 
@@ -138,5 +139,6 @@ def app():
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.info("Logged out successfully.")
+
 # Note: Uncomment the following line to run this script directly in your local environment.
 # app()
