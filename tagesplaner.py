@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import defaultdict
 
 class Task:
     def __init__(self, name, priority, date):
         self.name = name
         self.priority = priority
+        # Datum in ein datetime-Objekt konvertieren
         self.date = datetime.strptime(date, "%Y-%m-%d")
     
     def __repr__(self):
@@ -12,7 +13,8 @@ class Task:
 
 class DailyPlanner:
     def __init__(self):
-        self.tasks = defaultdict(list)  # Verwende defaultdict, um Aufgaben nach Datum zu speichern
+        # defaultdict, um Aufgaben nach Datum zu speichern
+        self.tasks = defaultdict(list)
 
     def add_task(self, name, priority, date):
         task = Task(name, priority, date)
@@ -23,10 +25,12 @@ class DailyPlanner:
     def remove_task(self, date, name):
         if date in self.tasks:
             self.tasks[date] = [task for task in self.tasks[date] if task.name != name]
+            # Datum entfernen, wenn keine Aufgaben mehr vorhanden
             if not self.tasks[date]:
                 del self.tasks[date]
 
     def display_tasks(self, date):
+        # Datum in ein datetime-Objekt konvertieren
         date_obj = datetime.strptime(date, "%Y-%m-%d")
         if date_obj not in self.tasks or not self.tasks[date_obj]:
             print(f"Keine Aufgaben am {date} vorhanden.")
@@ -107,7 +111,7 @@ class CalendarApp:
                     print(f"Aufgabe '{name}' am {date} entfernt.")
 
             elif choice == "5":
-                if nicht self.logged_in_user:
+                if not self.logged_in_user:
                     print("Sie müssen sich anmelden, um Aufgaben anzuzeigen.")
                 else:
                     date = input("Aufgabendatum eingeben (YYYY-MM-DD): ")
