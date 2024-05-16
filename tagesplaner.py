@@ -32,11 +32,11 @@ def app():
     # Show calendar
     st.subheader(calendar.month_name[month] + " " + str(year))
     cal = calendar_view(year, month)
+    cols = st.columns(7)
     for week in cal:
-        cols = st.columns(7)
         for day in week:
             if day != 0:
-                cols[day - 1].button(label=str(day), key=f"{year}-{month:02}-{day:02}")
+                cols[calendar.weekday(year, month, day)].button(label=str(day), key=f"{year}-{month:02}-{day:02}")
 
 if __name__ == "__main__":
     app()
