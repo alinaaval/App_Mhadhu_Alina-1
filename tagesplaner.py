@@ -211,4 +211,8 @@ def app():
                 del st.session_state[key]
             st.info("Logged out successfully.")
 
+if __name__ == "__main__":
+    app()
+
+
 
