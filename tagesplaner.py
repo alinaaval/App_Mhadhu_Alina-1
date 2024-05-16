@@ -2,16 +2,19 @@ import streamlit as st
 import pandas as pd
 import calendar
 from datetime import datetime, timedelta
-
 import sqlite3
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
 conn = sqlite3.connect('user_data.db')
 c = conn.cursor()
 
-# Tabelle für Benutzer erstellen, falls sie noch nicht existiert
+# Tabellen für Benutzer, Aufgaben und Termine erstellen, falls sie noch nicht existieren
 c.execute('''CREATE TABLE IF NOT EXISTS users
              (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+c.execute('''CREATE TABLE IF NOT EXISTS tasks
+             (id INTEGER PRIMARY KEY, username TEXT, date TEXT, task TEXT)''')
+c.execute('''CREATE TABLE IF NOT EXISTS events
+             (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT)''')
 conn.commit()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
@@ -22,7 +25,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -42,6 +45,21 @@ def show_day_view(date):
     st.title("Tagesansicht")
     st.write(f"Anzeigen von Informationen für {date}")
 
+    # Aufgaben und Termine für den ausgewählten Tag abrufen
+    username = st.session_state['username']
+    c.execute("SELECT task FROM tasks WHERE username=? AND date=?", (username, date))
+    tasks = c.fetchall()
+    c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date))
+    events = c.fetchall()
+
+    st.subheader("Aufgaben")
+    for task in tasks:
+        st.write(task[0])
+
+    st.subheader("Termine")
+    for event in events:
+        st.write(event[0])
+
 # Funktion zur Berechnung des nächsten Monats
 def next_month(current_year, current_month):
     next_month_year = current_year
@@ -59,6 +77,16 @@ def previous_month(current_year, current_month):
         previous_month = 12
         previous_month_year -= 1
     return previous_month_year, previous_month
+
+# Funktion zur Aufgabenhinzufügung
+def add_task(username, date, task):
+    c.execute("INSERT INTO tasks (username, date, task) VALUES (?, ?, ?)", (username, date, task))
+    conn.commit()
+
+# Funktion zur Terminhinzufügung
+def add_event(username, date, event):
+    c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
+    conn.commit()
 
 # Streamlit-Anwendung
 def main():
@@ -88,6 +116,7 @@ def main():
                     st.success("Anmeldung erfolgreich!")
                     st.write("Willkommen zurück,", login_username)
                     st.session_state['authenticated'] = True
+                    st.session_state['username'] = login_username
                 else:
                     st.error("Ungültige Anmeldeinformationen!")
         return
@@ -98,13 +127,13 @@ def main():
         logout()
         return
 
-    # Date selection
+    # Datumsauswahl
     selected_date = st.date_input("Datum", value=datetime.today())
 
     if selected_date:
         year, month, _ = selected_date.year, selected_date.month, selected_date.day
 
-        # Show calendar
+        # Kalender anzeigen
         st.subheader(calendar.month_name[month] + " " + str(year))
         cal = calendar.monthcalendar(year, month)
         for week in cal:
@@ -115,15 +144,18 @@ def main():
                     if cols[calendar.weekday(year, month, day)].button(str(day)):
                         show_day_view(date)
 
-# Funktion zur Aufgabenhinzufügung
-def add_task(username, date, task):
-    c.execute("INSERT INTO tasks (username, date, task) VALUES (?, ?, ?)", (username, date, task))
-    conn.commit()
+        # Formulare zum Hinzufügen von Aufgaben und Terminen
+        st.subheader("Neue Aufgabe hinzufügen")
+        task = st.text_input("Aufgabe")
+        if st.button("Aufgabe hinzufügen"):
+            add_task(st.session_state['username'], selected_date.strftime("%Y-%m-%d"), task)
+            st.success("Aufgabe hinzugefügt!")
 
-# Funktion zur Terminhinzufügung
-def add_event(username, date, event):
-    c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
-    conn.commit()
+        st.subheader("Neuen Termin hinzufügen")
+        event = st.text_input("Termin")
+        if st.button("Termin hinzufügen"):
+            add_event(st.session_state['username'], selected_date.strftime("%Y-%m-%d"), event)
+            st.success("Termin hinzugefügt!")
 
 if __name__ == "__main__":
     main()
