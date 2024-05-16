@@ -75,6 +75,7 @@ def app():
             if authenticate(username, password):
                 st.session_state['logged_in'] = True
                 st.session_state['username'] = username
+                st.session_state['selected_date'] = datetime.today()
                 st.success("Logged in successfully")
             else:
                 st.error("Invalid username or password")
@@ -82,12 +83,13 @@ def app():
             if add_user(username, password):
                 st.session_state['logged_in'] = True
                 st.session_state['username'] = username
+                st.session_state['selected_date'] = datetime.today()
                 st.success("Registration successful. You are now logged in.")
             else:
                 st.error("Username already taken")
     else:
         # Display month navigation and calendar
-        selected_date = st.session_state.get('selected_date', datetime.today())
+        selected_date = st.session_state['selected_date']
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("Previous"):
@@ -98,6 +100,7 @@ def app():
         with col3:
             if st.button("Next"):
                 selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
+                selected_date = selected_date.replace(day=1)
                 st.session_state['selected_date'] = selected_date
 
         # Show calendar
@@ -117,24 +120,12 @@ def app():
             st.subheader(f"Details for {current_date}")
             user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
             user_events = get_events_by_date(st.session_state['username'], current_date)
-            if not user_tasks.empty or not user_events.empty:
-                if not user_tasks.empty:
-                    st.write("Tasks:")
-                    st.dataframe(user_tasks)
-                if not user_events.empty:
-                    st.write("Events:")
-                    st.dataframe(user_events)
-
-                with st.form("add_event"):
-                    event_desc = st.text_input("Event Description")
-                    add_event_btn = st.form_submit_button("Add Event")
-                
-                if add_event_btn:
-                    add_event(st.session_state['username'], current_date, event_desc)
-                    st.success("Event added successfully")
+            
+            if not user_tasks.empty:
+                st.write("Tasks:")
+                st.dataframe(user_tasks)
             else:
-                st.write("No tasks or events for this day.")
-                
+                st.write("No tasks for this day.")
                 with st.form("add_task"):
                     task_desc = st.text_input("Task Description")
                     task_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
@@ -144,13 +135,23 @@ def app():
                     add_task(st.session_state['username'], current_date, task_desc, task_importance)
                     st.success("Task added successfully")
 
+            if not user_events.empty:
+                st.write("Events:")
+                st.dataframe(user_events)
+            else:
+                st.write("No events for this day.")
+                with st.form("add_event"):
+                    event_desc = st.text_input("Event Description")
+                    add_event_btn = st.form_submit_button("Add Event")
+                
+                if add_event_btn:
+                    add_event(st.session_state['username'], current_date, event_desc)
+                    st.success("Event added successfully")
+
         if st.button("Logout"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.info("Logged out successfully.")
-
-# Note: Uncomment the following line to run this script directly in your local environment.
-# app()
 
 if __name__ == "__main__":
     app()
