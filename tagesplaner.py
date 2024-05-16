@@ -229,4 +229,15 @@ c.execute('''CREATE TABLE IF NOT EXISTS users
 # Datenbankverbindung schließen
 conn.close()
 
+import sqlite3
+
+def add_user(username, password):
+    conn = sqlite3.connect('user_data.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+    conn.commit()
+    conn.close()
+
+# Beispielaufruf der Funktion
+add_user("benutzername", "passwort")
 
