@@ -40,7 +40,7 @@ def calendar_view(year, month):
     cal_df.columns = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
     return cal_df
 
-def show_calendar_page():
+def show_calendar():
     st.title("Kalender")
     today = datetime.today()
     year, month = today.year, today.month
@@ -100,9 +100,7 @@ def app():
                 
                 # Button zum Öffnen des Kalenders
                 if st.button("Kalender öffnen"):
-                    show_calendar_page()
-            else:
-                st.error("Ungültige Anmeldeinformationen!")
+                    show_calendar()
 
 if __name__ == "__main__":
     app()
