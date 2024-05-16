@@ -1,63 +1,45 @@
 import streamlit as st
-from datetime import datetime, timedelta
+import pandas as pd
 import calendar
-
-def large_calendar_input(label, min_date=None, max_date=None, key=None):
-    """Custom implementation of a large calendar date input."""
-    selected_date = st.date_input(label, min_value=min_date, max_value=max_date, key=key)
-    return selected_date
+from datetime import datetime
 
 def calendar_view(year, month):
     """Create a calendar view for the given month and year."""
     cal = calendar.monthcalendar(year, month)
     return cal
 
-def previous_month(current_year, current_month):
-    """Get the previous month."""
-    previous_month_year = current_year
-    previous_month = current_month - 1
-    if previous_month < 1:
-        previous_month = 12
-        previous_month_year -= 1
-    return previous_month_year, previous_month
-
-def next_month(current_year, current_month):
-    """Get the next month."""
-    next_month_year = current_year
-    next_month = current_month + 1
-    if next_month > 12:
-        next_month = 1
-        next_month_year += 1
-    return next_month_year, next_month
-
 def app():
     st.title("Kalender App")
 
     # Date selection
-    selected_date = large_calendar_input("Datum")
+    selected_date = st.date_input("Datum", value=datetime.today())
+    year, month, _ = selected_date.year, selected_date.month, selected_date.day
 
-    if selected_date:
-        year, month, _ = selected_date.year, selected_date.month, selected_date.day
-
-        # Show calendar
-        st.subheader(calendar.month_name[month] + " " + str(year))
-        cal = calendar_view(year, month)
+    # Show calendar
+    cal = calendar_view(year, month)
+    for week in cal:
         cols = st.columns(7)
-        for week in cal:
-            for day in week:
+        for day in week:
+            with cols[day % 7]:
                 if day != 0:
-                    cols[calendar.weekday(year, month, day)].write(str(day))
+                    date_str = f"{year}-{month:02}-{day:02}"
+                    st.write(f"**{day}**")
 
-        # Previous and Next Month Buttons
-        col1, col2, col3 = st.columns(3)
-        with col2:
-            if st.button("Vorheriger Monat"):
-                year, month = previous_month(year, month)
-                selected_date = datetime(year, month, 1)
-        with col3:
-            if st.button("Nächster Monat"):
-                year, month = next_month(year, month)
-                selected_date = datetime(year, month, 1)
+                    # Text input for each day
+                    note = st.text_area("Notiz oder Aufgabe", key=date_str)
+                    if st.button("Speichern", key=f"{date_str}_save"):
+                        st.success(f"Notiz oder Aufgabe für {date_str} gespeichert: {note}")
+
+    # Previous and Next month navigation buttons
+    col_prev, col_next = st.columns(2)
+    with col_prev:
+        if st.button("Vorheriger Monat"):
+            new_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
+            st.date_input("Datum", value=new_date, key="prev_month_date")
+    with col_next:
+        if st.button("Nächster Monat"):
+            new_date = selected_date.replace(day=1) + pd.DateOffset(months=1)
+            st.date_input("Datum", value=new_date, key="next_month_date")
 
 if __name__ == "__main__":
     app()
