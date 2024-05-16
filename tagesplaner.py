@@ -144,9 +144,7 @@ def main():
                         if st.button(button_label, key=date_str, help=date_str):
                             st.session_state['current_date'] = date_str
 
-        # Show selected day details
-        if 'current_date' in st.session_state:
             current_date = st.session_state['current_date']
             st.subheader(f"Details for {current_date}")
             user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
-            user_events = get_events_by_date(st.session
+            user_events = get_events_by_date(st.session_state['username'], current_date)
