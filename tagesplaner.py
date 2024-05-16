@@ -42,11 +42,19 @@ def calendar_view(year, month):
 
 def show_calendar():
     st.title("Kalender")
-    today = datetime.today()
-    year, month = today.year, today.month
-    cal_df = calendar_view(year, month)
-    st.write("**Kalenderansicht für", calendar.month_name[month], year, ":**")
-    st.dataframe(cal_df)
+            cal = calendar_view(selected_date.year, selected_date.month)
+        st.write("**Click on a day to add/view tasks and events**")
+        for week in cal:
+            cols = st.columns(7)
+            for day, col in zip(week, cols):
+                with col:
+                    if day != 0:
+                        date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
+                        button_label = f"{day}"
+                        day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
+                        day_events = get_events_by_date(st.session_state['username'], date_str)
+                        if not day_tasks.empty or not day_events.empty:
+                            task_importance = day_tasks['importance'].values if not day_tasks.empty else 
 
 def app():
     # Custom CSS for pastel pink gradient and other styling
