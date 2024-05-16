@@ -148,7 +148,8 @@ def main():
 if _name_ == "_main_":
     main()
 
-        if st.button("Register"):
+        
+if st.button("Register"):
             if add_user(username, password):
                 st.session_state['logged_in'] = True
                 st.session_state['username'] = username
