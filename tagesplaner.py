@@ -61,13 +61,13 @@ def main():
             if login(login_username, login_password):
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
+             def calendar_view(year, month):
+               cal = calendar.monthcalendar(year, month)
+               return cal 
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
-def calendar_view(year, month):
-    """Create a calendar view for the given month and year."""
-    cal = calendar.monthcalendar(year, month)
-    return cal
+
 
 def add_calendar_entry(username, date, entry_type, description, importance=None, priority=None):
     """Add a calendar entry which can be a task or an event."""
