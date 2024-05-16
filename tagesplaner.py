@@ -43,13 +43,14 @@ def logout():
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
     st.title("Tagesansicht")
-    st.write(f"Anzeigen von Informationen für {date}")
+    st.write(f"Anzeigen von Informationen für {date.strftime('%Y-%m-%d')}")
+
+    username = st.session_state['username']
 
     # Aufgaben und Termine für den ausgewählten Tag abrufen
-    username = st.session_state['username']
-    c.execute("SELECT task FROM tasks WHERE username=? AND date=?", (username, date))
+    c.execute("SELECT task FROM tasks WHERE username=? AND date=?", (username, date.strftime('%Y-%m-%d')))
     tasks = c.fetchall()
-    c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date))
+    c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date.strftime('%Y-%m-%d')))
     events = c.fetchall()
 
     st.subheader("Aufgaben")
@@ -59,6 +60,21 @@ def show_day_view(date):
     st.subheader("Termine")
     for event in events:
         st.write(event[0])
+
+    # Formulare zum Hinzufügen von Aufgaben und Terminen
+    st.subheader("Neue Aufgabe hinzufügen")
+    task = st.text_input("Aufgabe")
+    if st.button("Aufgabe hinzufügen"):
+        add_task(username, date.strftime('%Y-%m-%d'), task)
+        st.success("Aufgabe hinzugefügt!")
+        st.experimental_rerun()  # Seite neu laden, um die neue Aufgabe anzuzeigen
+
+    st.subheader("Neuen Termin hinzufügen")
+    event = st.text_input("Termin")
+    if st.button("Termin hinzufügen"):
+        add_event(username, date.strftime('%Y-%m-%d'), event)
+        st.success("Termin hinzugefügt!")
+        st.experimental_rerun()  # Seite neu laden, um den neuen Termin anzuzeigen
 
 # Funktion zur Berechnung des nächsten Monats
 def next_month(current_year, current_month):
@@ -143,19 +159,6 @@ def main():
                     date = datetime(year, month, day)
                     if cols[calendar.weekday(year, month, day)].button(str(day)):
                         show_day_view(date)
-
-        # Formulare zum Hinzufügen von Aufgaben und Terminen
-        st.subheader("Neue Aufgabe hinzufügen")
-        task = st.text_input("Aufgabe")
-        if st.button("Aufgabe hinzufügen"):
-            add_task(st.session_state['username'], selected_date.strftime("%Y-%m-%d"), task)
-            st.success("Aufgabe hinzugefügt!")
-
-        st.subheader("Neuen Termin hinzufügen")
-        event = st.text_input("Termin")
-        if st.button("Termin hinzufügen"):
-            add_event(st.session_state['username'], selected_date.strftime("%Y-%m-%d"), event)
-            st.success("Termin hinzugefügt!")
 
 if __name__ == "__main__":
     main()
