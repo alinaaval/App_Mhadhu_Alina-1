@@ -67,52 +67,7 @@ def app():
                 if st.button(button_label, key=date_str, help=date_str):
                     st.session_state['current_date'] = date_str
 
-    # Show selected day details
-    if 'current_date' in st.session_state:
-        current_date = st.session_state['current_date']
-        st.subheader(f"Details for {current_date}")
-        user_tasks = pd.DataFrame() # Placeholder for tasks
-        user_events = pd.DataFrame() # Placeholder for events
-        
-        st.write("**Tasks:**")
-        if not user_tasks.empty:
-            for index, task in user_tasks.iterrows():
-                st.markdown(
-                    f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
-                    unsafe_allow_html=True
-                )
-        else:
-            st.write("No tasks for this day.")
-        
-        st.write("**Add a new task or event:**")
-        entry_type = st.selectbox("Entry Type", ["Task", "Event"])
-        entry_desc = st.text_input("Description")
-        if entry_type == "Task":
-            entry_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
-            entry_priority = None
-        else:
-            entry_importance = None
-            entry_priority = st.selectbox("Priority", ["Dringend", "kann warten"])
-        if st.button("Add Entry"):
-            add_calendar_entry(st.session_state['username'], current_date, entry_type, entry_desc, entry_importance, entry_priority)
-            st.success(f"{entry_type} added successfully")
-            # Refresh the task and event list after adding
-            user_tasks = pd.DataFrame() # Placeholder for tasks
-            user_events = pd.DataFrame() # Placeholder for events
-            if entry_type == "Task":
-                st.write("**Tasks:**")
-                for index, task in user_tasks.iterrows():
-                    st.markdown(
-                        f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
-                        unsafe_allow_html=True
-                    )
-                else:
-                    st.write("**Events:**")
-                    for index, event in user_events.iterrows():
-                        st.markdown(
-                            f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
-                            unsafe_allow_html=True
-                        )
+   
 
 if __name__ == "__main__":
     app()
