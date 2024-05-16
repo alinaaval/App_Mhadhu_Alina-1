@@ -1,7 +1,9 @@
+Registration, anmeldung plus mini kalender
 import streamlit as st
-import pandas as pd
-import calendar
 import sqlite3
+import calendar
+from datetime import datetime
+import pandas as pd
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
 conn = sqlite3.connect('user_data.db')
@@ -31,8 +33,42 @@ def login(username, password):
     c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
     return c.fetchone() is not None
 
-# Streamlit-Anwendung
-def main():
+# Funktion zur Erstellung eines Kalenderansichts für den gegebenen Monat und Jahr
+def calendar_view(year, month):
+    cal = calendar.monthcalendar(year, month)
+    cal_df = pd.DataFrame(cal)
+    cal_df = cal_df.replace(0, '')
+    cal_df.columns = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+    return cal_df
+
+def app():
+    # Custom CSS for pastel pink gradient and other styling
+    st.markdown("""
+        <style>
+        html, body, [class*="css"] {
+            height: 100%;
+            background: linear-gradient(180deg, #FFC0CB, #FFB6C1, #FF69B4, #FF1493, #FFC0CB);
+            color: #4B0082;
+        }
+        .low-importance {
+            background-color: #D3FFD3;
+        }
+        .medium-importance {
+            background-color: #FFFF99;
+        }
+        .high-importance {
+            background-color: #FF9999;
+        }
+        .urgent-priority {
+            border: 2px solid red;
+            background-color: #FF9999;
+        }
+        .can-wait-priority {
+            border: 2px solid green;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
     st.title("Benutzerregistrierung und -anmeldung")
 
     if st.checkbox("Registrieren"):
@@ -54,8 +90,15 @@ def main():
             if login(login_username, login_password):
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
+                
+                # Zeige den Kalender für den aktuellen Monat an
+                today = datetime.today()
+                year, month = today.year, today.month
+                cal_df = calendar_view(year, month)
+                st.write("**Kalenderansicht für", calendar.month_name[month], year, ":**")
+                st.dataframe(cal_df)
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
 if __name__ == "__main__":
-    main()
+    app()
