@@ -197,4 +197,5 @@ def app():
                         )
                 else:
                     st.write("**Events:**")
-                    for
+                    for index,
+
