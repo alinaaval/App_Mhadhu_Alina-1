@@ -1,59 +1,52 @@
 import streamlit as st
 import pandas as pd
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 
-# Initialize session state
-if 'users' not in st.session_state:
-    st.session_state['users'] = pd.DataFrame(columns=['username', 'password'])
-
-if 'tasks' not in st.session_state:
-    st.session_state['tasks'] = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
-
-if 'events' not in st.session_state:
-    st.session_state['events'] = pd.DataFrame(columns=['username', 'date', 'description'])
+# Global DataFrames initialized
+users = pd.DataFrame(columns=['username', 'password'])
+tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
+events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
 
 def authenticate(username, password):
+    global users
     """Check if the user credentials are valid."""
-    users = st.session_state['users']
     user_data = users[users['username'] == username]
     if not user_data.empty:
         return user_data.iloc[0]['password'] == password
     return False
 
 def add_user(username, password):
+    global users
     """Add a new user to the DataFrame."""
-    users = st.session_state['users']
     if username not in users['username'].values:
         new_user = pd.DataFrame({'username': [username], 'password': [password]})
-        st.session_state['users'] = pd.concat([users, new_user], ignore_index=True)
+        users = pd.concat([users, new_user], ignore_index=True)
         return True
     return False
 
 def add_task(username, date, description, importance):
+    global tasks
     """Add a new task to the DataFrame."""
-    tasks = st.session_state['tasks']
     new_task = pd.DataFrame({
         'username': [username], 'date': [date], 'description': [description], 'importance': [importance]
     })
-    st.session_state['tasks'] = pd.concat([tasks, new_task], ignore_index=True)
+    tasks = pd.concat([tasks, new_task], ignore_index=True)
 
-def add_event(username, date, description):
+def add_event(username, date, description, priority):
+    global events
     """Add a new event to the DataFrame."""
-    events = st.session_state['events']
     new_event = pd.DataFrame({
-        'username': [username], 'date': [date], 'description': [description]
+        'username': [username], 'date': [date], 'description': [description], 'priority': [priority]
     })
-    st.session_state['events'] = pd.concat([events, new_event], ignore_index=True)
+    events = pd.concat([events, new_event], ignore_index=True)
 
 def get_tasks_by_date(username, date):
     """Retrieve tasks for the logged-in user for a specific date."""
-    tasks = st.session_state['tasks']
     return tasks[(tasks['username'] == username) & (tasks['date'] == date)]
 
 def get_events_by_date(username, date):
     """Retrieve events for the logged-in user for a specific date."""
-    events = st.session_state['events']
     return events[(events['username'] == username) & (events['date'] == date)]
 
 def calendar_view(year, month):
@@ -61,13 +54,20 @@ def calendar_view(year, month):
     cal = calendar.monthcalendar(year, month)
     return cal
 
+def add_calendar_entry(username, date, entry_type, description, importance=None, priority=None):
+    """Add a calendar entry which can be a task or an event."""
+    if entry_type == 'Task':
+        add_task(username, date, description, importance)
+    elif entry_type == 'Event':
+        add_event(username, date, description, priority)
+
 def app():
-    # Custom CSS for pastel gradient and other styling
+    # Custom CSS for pastel pink gradient and other styling
     st.markdown("""
         <style>
         html, body, [class*="css"] {
             height: 100%;
-            background: linear-gradient(180deg, #F0F8FF, #E6E6FA, #D8BFD8, #DDA0DD);
+            background: linear-gradient(180deg, #FFC0CB, #FFB6C1, #FF69B4, #FF1493, #FFC0CB);
             color: #4B0082;
         }
         .low-importance {
@@ -79,11 +79,12 @@ def app():
         .high-importance {
             background-color: #FF9999;
         }
-        .calendar-day {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
-            margin: 2px;
+        .urgent-priority {
+            border: 2px solid red;
+            background-color: #FF9999;
+        }
+        .can-wait-priority {
+            border: 2px solid green;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -115,14 +116,13 @@ def app():
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("Previous"):
-                selected_date = selected_date.replace(day=1) - timedelta(days=1)
-                selected_date = selected_date.replace(day=1)
+                selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
                 st.session_state['selected_date'] = selected_date
         with col2:
             st.write(selected_date.strftime("%B %Y"))
         with col3:
             if st.button("Next"):
-                selected_date = selected_date.replace(day=28) + timedelta(days=4)
+                selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
                 selected_date = selected_date.replace(day=1)
                 st.session_state['selected_date'] = selected_date
 
@@ -135,7 +135,16 @@ def app():
                 with col:
                     if day != 0:
                         date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
-                        if st.button(f"{day}", key=date_str, help=date_str):
+                        button_color = "style='background-color: #FFFFFF;'"
+                        day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
+                        if not day_tasks.empty:
+                            if 'High' in day_tasks['importance'].values:
+                                button_color = "style='background-color: #FF9999;'"
+                            elif 'Medium' in day_tasks['importance'].values:
+                                button_color = "style='background-color: #FFFF99;'"
+                            elif 'Low' in day_tasks['importance'].values:
+                                button_color = "style='background-color: #D3FFD3;'"
+                        if st.button(f"{day}", key=date_str, help=date_str, unsafe_allow_html=True):
                             st.session_state['current_date'] = date_str
 
         # Show selected day details
@@ -155,32 +164,39 @@ def app():
             else:
                 st.write("No tasks for this day.")
             
-            st.write("**Add a new task:**")
-            task_desc = st.text_input("Task Description")
-            task_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
-            if st.button("Add Task"):
-                add_task(st.session_state['username'], current_date, task_desc, task_importance)
-                st.success("Task added successfully")
-                st.experimental_rerun()  # Refresh the page to show the added task
+            st.write("**Add a new task or event:**")
+            entry_type = st.selectbox("Entry Type", ["Task", "Event"])
+            entry_desc = st.text_input("Description")
+            if entry_type == "Task":
+                entry_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
+                entry_priority = None
+            else:
+                entry_importance = None
+                entry_priority = st.selectbox("Priority", ["Dringend", "kann warten"])
+            if st.button("Add Entry"):
+                add_calendar_entry(st.session_state['username'], current_date, entry_type, entry_desc, entry_importance, entry_priority)
+                st.success(f"{entry_type} added successfully")
+                # Refresh the task and event list after adding
+                user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
+                user_events = get_events_by_date(st.session_state['username'], current_date)
+                if entry_type == "Task":
+                    st.write("**Tasks:**")
+                    for index, task in user_tasks.iterrows():
+                        st.markdown(
+                            f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
+                            unsafe_allow_html=True
+                        )
+                else:
+                    st.write("**Events:**")
+                    for index, event in user_events.iterrows():
+                        st.markdown(
+                            f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                            unsafe_allow_html=True
+                        )
 
             st.write("**Events:**")
             if not user_events.empty:
                 for index, event in user_events.iterrows():
-                    st.markdown(f"<div>{event['description']}</div>", unsafe_allow_html=True)
-            else:
-                st.write("No events for this day.")
-
-            st.write("**Add a new event:**")
-            event_desc = st.text_input("Event Description")
-            if st.button("Add Event"):
-                add_event(st.session_state['username'], current_date, event_desc)
-                st.success("Event added successfully")
-                st.experimental_rerun()  # Refresh the page to show the added event
-
-        if st.button("Logout"):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.info("Logged out successfully.")
-
-if __name__ == "__main__":
-    app()
+                    st.markdown(
+                        f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                        unsafe_allow
