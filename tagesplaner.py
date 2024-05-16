@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def calendar_view(year, month):
     """Create a calendar view for the given month and year."""
@@ -59,16 +59,26 @@ def app():
     year, month, _ = selected_date.year, selected_date.month, selected_date.day
 
     # Show calendar
-    cal = calendar_view(year, month)
-    for week in cal:
-        cols = st.columns(7)
-        for day, col in zip(week, cols):
-            if day != 0:
-                date_str = f"{year}-{month:02}-{day:02}"
-                button_label = f"{day}"
-                col.markdown(f"<div class='day-button'>{button_label}</div>", unsafe_allow_html=True)
-                if st.button(button_label, key=date_str, help=date_str):
-                    st.session_state['current_date'] = date_str
+    col1, col2, col3 = st.columns([1, 8, 1])
+    with col2:
+        st.write(calendar.month_name[month], year)
+        cal = calendar_view(year, month)
+        for week in cal:
+            cols = st.columns(7)
+            for day, col in zip(week, cols):
+                if day != 0:
+                    date_str = f"{year}-{month:02}-{day:02}"
+                    button_label = f"{day}"
+                    col.markdown(f"<div class='day-button'>{button_label}</div>", unsafe_allow_html=True)
+                    if st.button(button_label, key=date_str, help=date_str):
+                        st.session_state['current_date'] = date_str
+    with col1:
+        if st.button("◀️"):
+            prev_month = selected_date - timedelta(days=selected_date.day)
+            st.session_state['selected_date'] = prev_month
+        if st.button("▶️"):
+            next_month = selected_date + timedelta(days=(calendar.monthrange(selected_date.year, selected_date.month)[1] - selected_date.day + 1))
+            st.session_state['selected_date'] = next_month
 
     # Show selected day details
     if 'current_date' in st.session_state:
@@ -81,7 +91,7 @@ def app():
         if not user_tasks.empty:
             for index, task in user_tasks.iterrows():
                 st.markdown(
-                    f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
+                    f"<div class={'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
                     unsafe_allow_html=True
                 )
         else:
@@ -106,14 +116,14 @@ def app():
                 st.write("**Tasks:**")
                 for index, task in user_tasks.iterrows():
                     st.markdown(
-                        f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
+                        f"<div class={'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
                         unsafe_allow_html=True
                     )
                 else:
                     st.write("**Events:**")
                     for index, event in user_events.iterrows():
                         st.markdown(
-                            f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                            f"<div class={'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
                             unsafe_allow_html=True
                         )
 
