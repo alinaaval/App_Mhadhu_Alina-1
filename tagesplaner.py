@@ -64,6 +64,9 @@ def main():
         else:
             st.error("Ungültige Anmeldeinformationen!")
 
+username = st.text_input("Benutzername", key="username_input")
+
+
 if __name__ == "__main__":
     main()
 
