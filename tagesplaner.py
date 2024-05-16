@@ -4,9 +4,26 @@ import calendar
 from datetime import datetime
 
 # Global DataFrames initialized
+users = pd.DataFrame(columns=['username', 'password'])
 tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
 events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
 
+def authenticate(username, password):
+    global users
+    """Check if the user credentials are valid."""
+    user_data = users[users['username'] == username]
+    if not user_data.empty:
+        return user_data.iloc[0]['password'] == password
+    return False
+
+def add_user(username, password):
+    global users
+    """Add a new user to the DataFrame."""
+    if username not in users['username'].values:
+        new_user = pd.DataFrame({'username': [username], 'password': [password]})
+        users = pd.concat([users, new_user], ignore_index=True)
+        return True
+    return False
 
 def add_task(username, date, description, importance):
     global tasks
@@ -72,8 +89,88 @@ def app():
         </style>
         """, unsafe_allow_html=True)
     
-    
+    if _name_ == "_main_":
+    app()
 
+import streamlit as st
+import sqlite3
+
+# Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
+conn = sqlite3.connect('user_data.db')
+c = conn.cursor()
+
+conn = sqlite3.connect('my_database.db')
+conn.close()
+
+# Funktion zur Überprüfung, ob ein Benutzer bereits existiert
+def user_exists(username):
+    c.execute("SELECT * FROM users WHERE username=?", (username,))
+    return c.fetchone() is not None
+
+# Funktion zur Registrierung eines neuen Benutzers
+def register(username, password):
+    if not user_exists(username):
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        return True
+    else:
+        return False
+
+# Funktion zur Überprüfung der Anmeldeinformationen
+def login(username, password):
+    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+    return c.fetchone() is not None
+
+# Streamlit-Anwendung
+def main():
+    st.title("Benutzerregistrierung und -anmeldung")
+
+    # Benutzerregistrierung
+    st.subheader("Registrierung")
+    new_username = st.text_input("Benutzername")
+    new_password = st.text_input("Passwort", type="password")
+    if st.button("Registrieren"):
+        if register(new_username, new_password):
+            st.success("Registrierung erfolgreich!")
+        else:
+            st.error("Benutzername bereits vergeben!")
+
+    # Benutzeranmeldung
+    st.subheader("Anmeldung")
+    username = st.text_input("Benutzername")
+    password = st.text_input("Passwort", type="password")
+    if st.button("Anmelden"):
+        if login(username, password):
+            st.success("Anmeldung erfolgreich!")
+        else:
+            st.error("Ungültige Anmeldeinformationen!")
+
+if _name_ == "_main_":
+    main()
+
+        if st.button("Register"):
+            if add_user(username, password):
+                st.session_state['logged_in'] = True
+                st.session_state['username'] = username
+                st.session_state['selected_date'] = datetime.today()
+                st.success("Registration successful. You are now logged in.")
+            else:
+                st.error("Username already taken")
+    else:
+        # Display month navigation and calendar
+        selected_date = st.session_state['selected_date']
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("Previous"):
+                selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
+                st.session_state['selected_date'] = selected_date
+        with col2:
+            st.write(selected_date.strftime("%B %Y"))
+        with col3:
+            if st.button("Next"):
+                selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
+                selected_date = selected_date.replace(day=1)
+                st.session_state['selected_date'] = selected_date
 
         # Show calendar
         cal = calendar_view(selected_date.year, selected_date.month)
@@ -162,61 +259,3 @@ def app():
 
 if __name__ == "__main__":
     app()
-
-import streamlit as st
-import sqlite3
-
-# Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
-conn = sqlite3.connect('user_data.db')
-c = conn.cursor()
-
-conn = sqlite3.connect('my_database.db')
-conn.close()
-
-# Funktion zur Überprüfung, ob ein Benutzer bereits existiert
-def user_exists(username):
-    c.execute("SELECT * FROM users WHERE username=?", (username,))
-    return c.fetchone() is not None
-
-# Funktion zur Registrierung eines neuen Benutzers
-def register(username, password):
-    if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
-        conn.commit()
-        return True
-    else:
-        return False
-
-# Funktion zur Überprüfung der Anmeldeinformationen
-def login(username, password):
-    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-    return c.fetchone() is not None
-
-# Streamlit-Anwendung
-def main():
-    st.title("Benutzerregistrierung und -anmeldung")
-
-    # Benutzerregistrierung
-    st.subheader("Registrierung")
-    new_username = st.text_input("Benutzername")
-    new_password = st.text_input("Passwort", type="password")
-    if st.button("Registrieren"):
-        if register(new_username, new_password):
-            st.success("Registrierung erfolgreich!")
-        else:
-            st.error("Benutzername bereits vergeben!")
-
-    # Benutzeranmeldung
-    st.subheader("Anmeldung")
-    username = st.text_input("Benutzername")
-    password = st.text_input("Passwort", type="password")
-    if st.button("Anmelden"):
-        if login(username, password):
-            st.success("Anmeldung erfolgreich!")
-        else:
-            st.error("Ungültige Anmeldeinformationen!")
-
-if __name__ == "__main__":
-    main()
-
-
