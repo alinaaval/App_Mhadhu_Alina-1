@@ -76,4 +76,4 @@ def app():
         new_username = st.text_input("Benutzername")
         new_password = st.text_input("Passwort", type="password")
         if st.button("Registrieren"):
-            if regist
+            if regist:
