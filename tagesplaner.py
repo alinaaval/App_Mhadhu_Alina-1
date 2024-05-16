@@ -212,36 +212,6 @@ def app():
                 del st.session_state[key]
             st.info("Logged out successfully.")
 
-if __name__ == "__main__":
-    app()
-USERS_FILE = "users.csv"
-TASKS_FILE = "tasks.csv"
-EVENTS_FILE = "events.csv"
-
-# Load data from CSV files if they exist
-def load_data():
-    try:
-        users = pd.read_csv(USERS_FILE)
-    except FileNotFoundError:
-        users = pd.DataFrame(columns=['username', 'password'])
-        
-    try:
-        tasks = pd.read_csv(TASKS_FILE)
-    except FileNotFoundError:
-        tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
-        
-    try:
-        events = pd.read_csv(EVENTS_FILE)
-    except FileNotFoundError:
-        events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
-
-    return users, tasks, events
-
-# Save data to CSV files
-def save_data(users, tasks, events):
-    users.to_csv(USERS_FILE, index=False)
-    tasks.to_csv(TASKS_FILE, index=False)
-    events.to_csv(EVENTS_FILE, index=False)
 
 # Initialization of session state for global DataFrames
 if 'users' not in st.session_state:
