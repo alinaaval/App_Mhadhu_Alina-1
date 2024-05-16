@@ -25,7 +25,7 @@ def app():
     st.title("Kalender App")
 
     # Date selection
-    selected_date = large_calendar_input("Datum", value=datetime.today())
+    selected_date = large_calendar_input("Datum")
 
     year, month, _ = selected_date.year, selected_date.month, selected_date.day
 
