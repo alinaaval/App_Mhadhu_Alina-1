@@ -1,14 +1,7 @@
 import streamlit as st
-import pandas as pd
-from datetime import datetime
-
-import streamlit as st
-import pandas as pd
+import sqlite3
 import calendar
 from datetime import datetime
-
-import streamlit as st
-import sqlite3
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
 conn = sqlite3.connect('user_data.db')
@@ -38,43 +31,10 @@ def login(username, password):
     c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
     return c.fetchone() is not None
 
-# Streamlit-Anwendung
-def main():
-    st.title("Benutzerregistrierung und -anmeldung")
-
-    if st.checkbox("Registrieren"):
-        # Benutzerregistrierung
-        st.subheader("Registrierung")
-        new_username = st.text_input("Benutzername")
-        new_password = st.text_input("Passwort", type="password")
-        if st.button("Registrieren"):
-            if register(new_username, new_password):
-                st.success("Registrierung erfolgreich!")
-            else:
-                st.error("Benutzername bereits vergeben!")
-    else:
-        # Benutzeranmeldung
-        st.subheader("Anmeldung")
-        login_username = st.text_input("Benutzername", key="login_username")
-        login_password = st.text_input("Passwort", type="password", key="login_password")
-        if st.button("Anmelden", key="login_button"):
-            if login(login_username, login_password):
-                st.success("Anmeldung erfolgreich!")
-                st.write("Willkommen zurück,", login_username)
-              def calendar_view(year, month):
-              cal = calendar.monthcalendar(year, month)
-              return cal 
-            else:
-                st.error("Ungültige Anmeldeinformationen!")
-
-
-
-def add_calendar_entry(username, date, entry_type, description, importance=None, priority=None):
-    """Add a calendar entry which can be a task or an event."""
-    if entry_type == 'Task':
-        add_task(username, date, description, importance)
-    elif entry_type == 'Event':
-        add_event(username, date, description, priority)
+# Funktion zur Erstellung eines Kalenderansichts für den gegebenen Monat und Jahr
+def calendar_view(year, month):
+    cal = calendar.monthcalendar(year, month)
+    return cal
 
 def app():
     # Custom CSS for pastel pink gradient and other styling
@@ -104,6 +64,42 @@ def app():
         </style>
         """, unsafe_allow_html=True)
 
+    st.title("Benutzerregistrierung und -anmeldung")
+
+    if st.checkbox("Registrieren"):
+        # Benutzerregistrierung
+        st.subheader("Registrierung")
+        new_username = st.text_input("Benutzername")
+        new_password = st.text_input("Passwort", type="password")
+        if st.button("Registrieren"):
+            if register(new_username, new_password):
+                st.success("Registrierung erfolgreich!")
+            else:
+                st.error("Benutzername bereits vergeben!")
+    else:
+        # Benutzeranmeldung
+        st.subheader("Anmeldung")
+        login_username = st.text_input("Benutzername", key="login_username")
+        login_password = st.text_input("Passwort", type="password", key="login_password")
+        if st.button("Anmelden", key="login_button"):
+            if login(login_username, login_password):
+                st.success("Anmeldung erfolgreich!")
+                st.write("Willkommen zurück,", login_username)
+                
+                # Zeige den Kalender für den aktuellen Monat an
+                today = datetime.today()
+                year, month = today.year, today.month
+                cal = calendar_view(year, month)
+                st.write("**Kalenderansicht:**")
+                for week in cal:
+                    for day in week:
+                        if day == 0:
+                            st.write("  ", end="")
+                        else:
+                            st.write(f"{day:2}", end="  ")
+                    st.write()
+            else:
+                st.error("Ungültige Anmeldeinformationen!")
 
 if __name__ == "__main__":
-    main()
+    app()
