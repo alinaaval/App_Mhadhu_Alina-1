@@ -1,7 +1,8 @@
 import streamlit as st
 import sqlite3
-import calendar
 from datetime import datetime
+from pytz import timezone
+from dateutil.parser import parse
 import pandas as pd
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
@@ -11,6 +12,11 @@ c = conn.cursor()
 # Tabelle für Benutzer erstellen, falls sie noch nicht existiert
 c.execute('''CREATE TABLE IF NOT EXISTS users
              (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+conn.commit()
+
+# Tabelle für Aufgaben und Termine erstellen, falls sie noch nicht existiert
+c.execute('''CREATE TABLE IF NOT EXISTS tasks_events
+             (id INTEGER PRIMARY KEY, username TEXT, date TEXT, description TEXT, priority TEXT)''')
 conn.commit()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
@@ -32,43 +38,22 @@ def login(username, password):
     c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
     return c.fetchone() is not None
 
-# Funktion zur Erstellung eines Kalenderansichts für den gegebenen Monat und Jahr
-def calendar_view(year, month):
-    cal = calendar.monthcalendar(year, month)
-    cal_df = pd.DataFrame(cal)
-    cal_df = cal_df.replace(0, '')
-    cal_df.columns = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
-    return cal_df
+# Funktion zur Hinzufügung einer Aufgabe oder eines Termins
+def add_task_event(username, date, description, priority):
+    c.execute("INSERT INTO tasks_events (username, date, description, priority) VALUES (?, ?, ?, ?)",
+              (username, date, description, priority))
+    conn.commit()
 
-def app():
-    # Custom CSS for pastel pink gradient and other styling
-    st.markdown("""
-        <style>
-        html, body, [class*="css"] {
-            height: 100%;
-            background: linear-gradient(180deg, #FFC0CB, #FFB6C1, #FF69B4, #FF1493, #FFC0CB);
-            color: #4B0082;
-        }
-        .low-importance {
-            background-color: #D3FFD3;
-        }
-        .medium-importance {
-            background-color: #FFFF99;
-        }
-        .high-importance {
-            background-color: #FF9999;
-        }
-        .urgent-priority {
-            border: 2px solid red;
-            background-color: #FF9999;
-        }
-        .can-wait-priority {
-            border: 2px solid green;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+# Funktion zur Anzeige aller Aufgaben und Termine eines Benutzers
+def get_tasks_events(username):
+    c.execute("SELECT date, description, priority FROM tasks_events WHERE username=?", (username,))
+    rows = c.fetchall()
+    df = pd.DataFrame(rows, columns=['Date', 'Description', 'Priority'])
+    return df
 
-    st.title("Benutzerregistrierung und -anmeldung")
+# Streamlit-Anwendung
+def main():
+    st.title("Kalender mit Aufgaben- und Terminverwaltung")
 
     if st.checkbox("Registrieren"):
         # Benutzerregistrierung
@@ -90,14 +75,52 @@ def app():
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
                 
-                # Zeige den Kalender für den aktuellen Monat an
-                today = datetime.today()
-                year, month = today.year, today.month
-                cal_df = calendar_view(year, month)
-                st.write("**Kalenderansicht für", calendar.month_name[month], year, ":**")
-                st.dataframe(cal_df)
+                # Kalender anzeigen
+                st.subheader("Kalenderansicht")
+                with st.spinner('Kalender wird geladen...'):
+                    st.write("Hier ist der interaktive Kalender:")
+                    st.write("Klicken Sie auf einen Tag, um eine Aufgabe oder einen Termin hinzuzufügen.")
+
+                    # Anzeige des Fullcalendar-Widgets
+                    st.write("""<div id='calendar'></div>""", unsafe_allow_html=True)
+
+                    # JavaScript-Code für die Konfiguration des Fullcalendar-Widgets
+                    js_code = f"""
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {{
+                            var calendarEl = document.getElementById('calendar');
+                            var calendar = new FullCalendar.Calendar(calendarEl, {{
+                                initialView: 'dayGridMonth',
+                                selectable: true,
+                                dateClick: function(info) {{
+                                    var date = info.dateStr;
+                                    var description = prompt('Beschreibung eingeben:');
+                                    var priority = prompt('Priorität eingeben (Niedrig, Mittel, Hoch):');
+                                    var username = '{login_username}';
+                                    if (description && priority) {{
+                                        var url = 'http://localhost:8501/add_task_event/' + username + '/' + date + '/' + description + '/' + priority;
+                                        fetch(url);
+                                        calendar.refetchEvents();
+                                    }}
+                                }},
+                                eventSources: [{{
+                                    url: 'http://localhost:8501/get_tasks_events/{login_username}',
+                                    method: 'GET',
+                                    extraParams: {{
+                                        cacheBuster: new Date().toISOString()
+                                    }},
+                                    failure: function() {{
+                                        alert('Fehler beim Laden von Aufgaben und Terminen.');
+                                    }},
+                                }}],
+                            }});
+                            calendar.render();
+                        }});
+                        </script>
+                    """
+                    st.write(js_code, unsafe_allow_html=True)
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
 if __name__ == "__main__":
-    app()
+    main()
