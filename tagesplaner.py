@@ -148,7 +148,7 @@ def get_events(username, date):
 
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
-    st.title("Tagesansicht")
+    st.title("{date}")
     st.write(f"Anzeigen von Informationen für {date}")
 
     # Aufgaben anzeigen
