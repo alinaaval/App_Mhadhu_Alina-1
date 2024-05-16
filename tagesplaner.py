@@ -125,7 +125,7 @@ def main():
             cols = st.columns(7)
             for day in week:
                 if day != 0:
-                    date = datetime(year, month, day)
+                    date = date(year, month, day)
                     if cols[calendar.weekday(year, month, day)].button(str(day)):
                         show_day_view(date)
 
