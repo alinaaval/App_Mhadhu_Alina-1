@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Global DataFrames initialized
 users = pd.DataFrame(columns=['username', 'password'])
@@ -55,12 +55,11 @@ def calendar_view(year, month):
     return cal
 
 def app():
-    # Custom CSS for pastel pink gradient and other styling
     st.markdown("""
         <style>
         html, body, [class*="css"] {
             height: 100%;
-            background: linear-gradient(180deg, #FFC0CB, #FFB6C1, #FF69B4, #FF1493, #FFC0CB);
+            background: linear-gradient(180deg, #F0F8FF, #E6E6FA, #D8BFD8, #DDA0DD);
             color: #4B0082;
         }
         .low-importance {
@@ -71,6 +70,12 @@ def app():
         }
         .high-importance {
             background-color: #FF9999;
+        }
+        .calendar-day {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            margin: 2px;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -121,17 +126,16 @@ def app():
                 with col:
                     if day != 0:
                         date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
-                        button_color = "style='background-color: #FFFFFF;'"
                         day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
-                        if not day_tasks.empty:
-                            if 'High' in day_tasks['importance'].values:
-                                button_color = "style='background-color: #FF9999;'"
-                            elif 'Medium' in day_tasks['importance'].values:
-                                button_color = "style='background-color: #FFFF99;'"
-                            elif 'Low' in day_tasks['importance'].values:
-                                button_color = "style='background-color: #D3FFD3;'"
+                        day_events = get_events_by_date(st.session_state['username'], date_str)
                         if st.button(f"{day}", key=date_str, help=date_str, unsafe_allow_html=True):
                             st.session_state['current_date'] = date_str
+                        if not day_tasks.empty or not day_events.empty:
+                            if not day_tasks.empty:
+                                st.markdown(
+                                    f"<div class='calendar-day'>{day}</div>", 
+                                    unsafe_allow_html=True
+                                )
 
         # Show selected day details
         if 'current_date' in st.session_state:
@@ -166,7 +170,11 @@ def app():
 
             st.write("**Events:**")
             if not user_events.empty:
-                st.dataframe(user_events)
+                for index, event in user_events.iterrows():
+                    st.markdown(
+                        f"<div>{event['description']}</div>", 
+                        unsafe_allow_html=True
+                    )
             else:
                 st.write("No events for this day.")
 
@@ -177,7 +185,11 @@ def app():
                 st.success("Event added successfully")
                 # Refresh the event list after adding
                 user_events = get_events_by_date(st.session_state['username'], current_date)
-                st.dataframe(user_events)
+                for index, event in user_events.iterrows():
+                    st.markdown(
+                        f"<div>{event['description']}</div>", 
+                        unsafe_allow_html=True
+                    )
 
         if st.button("Logout"):
             for key in list(st.session_state.keys()):
