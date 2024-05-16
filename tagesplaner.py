@@ -214,56 +214,6 @@ def app():
 if __name__ == "__main__":
     app()
 
-import streamlit as st
-import pandas as pd
-import sqlite3
-import calendar
-from datetime import datetime
-
-conn = sqlite3.connect('user_data.db')  # Verbindung zur Datenbank herstellen
-c = conn.cursor()
-
-# Datenbanktabelle für Benutzer erstellen, falls sie noch nicht existiert
-c.execute('''CREATE TABLE IF NOT EXISTS users
-             (id INTEGER PRIMARY KEY, username TEXT, password TEXT)''')
-
-# Datenbanktabelle für Aufgaben erstellen, falls sie noch nicht existiert
-c.execute('''CREATE TABLE IF NOT EXISTS tasks
-             (id INTEGER PRIMARY KEY, username TEXT, date TEXT, description TEXT, importance TEXT)''')
-
-# Datenbanktabelle für Ereignisse erstellen, falls sie noch nicht existiert
-c.execute('''CREATE TABLE IF NOT EXISTS events
-             (id INTEGER PRIMARY KEY, username TEXT, date TEXT, description TEXT, priority TEXT)''')
-
-# Funktionen für Datenbankzugriff
-def authenticate(username, password):
-    """Überprüfen, ob die Benutzeranmeldeinformationen gültig sind."""
-    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-    return c.fetchone() is not None
-
-def add_user(username, password):
-    """Einen neuen Benutzer in die Datenbank einfügen."""
-    c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
-    conn.commit()
-    return True
-
-def add_task(username, date, description, importance):
-    """Eine neue Aufgabe in die Datenbank einfügen."""
-    c.execute("INSERT INTO tasks (username, date, description, importance) VALUES (?, ?, ?, ?)", (username, date, description, importance))
-    conn.commit()
-
-def add_event(username, date, description, priority):
-    """Ein neues Ereignis in die Datenbank einfügen."""
-    c.execute("INSERT INTO events (username, date, description, priority) VALUES (?, ?, ?, ?)", (username, date, description, priority))
-    conn.commit()
-
-# Weitere Funktionen bleiben unverändert...
-
-# Anwendungsfunktion bleibt unverändert...
-
-if __name__ == "__main__":
-    app()
-
     
 
 
