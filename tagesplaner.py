@@ -105,6 +105,7 @@ def app():
 
         # Show calendar
         cal = calendar_view(selected_date.year, selected_date.month)
+        st.write("**Click on a day to add/view tasks and events**")
         for week in cal:
             cols = st.columns(7)
             for day, col in zip(week, cols):
@@ -121,38 +122,35 @@ def app():
             user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
             user_events = get_events_by_date(st.session_state['username'], current_date)
             
+            st.write("**Tasks:**")
             if not user_tasks.empty:
-                st.write("Tasks:")
                 st.dataframe(user_tasks)
-            if not user_events.empty:
-                st.write("Events:")
-                st.dataframe(user_events)
-
-            st.write("Add a new task:")
-            with st.form("add_task"):
-                task_desc = st.text_input("Task Description")
-                task_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
-                add_task_btn = st.form_submit_button("Add Task")
-
-            if add_task_btn:
+            else:
+                st.write("No tasks for this day.")
+            
+            st.write("**Add a new task:**")
+            task_desc = st.text_input("Task Description")
+            task_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
+            if st.button("Add Task"):
                 add_task(st.session_state['username'], current_date, task_desc, task_importance)
                 st.success("Task added successfully")
                 # Refresh the task list after adding
                 user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
-                st.write("Tasks:")
                 st.dataframe(user_tasks)
 
-            st.write("Add a new event:")
-            with st.form("add_event"):
-                event_desc = st.text_input("Event Description")
-                add_event_btn = st.form_submit_button("Add Event")
-                
-            if add_event_btn:
+            st.write("**Events:**")
+            if not user_events.empty:
+                st.dataframe(user_events)
+            else:
+                st.write("No events for this day.")
+
+            st.write("**Add a new event:**")
+            event_desc = st.text_input("Event Description")
+            if st.button("Add Event"):
                 add_event(st.session_state['username'], current_date, event_desc)
                 st.success("Event added successfully")
                 # Refresh the event list after adding
                 user_events = get_events_by_date(st.session_state['username'], current_date)
-                st.write("Events:")
                 st.dataframe(user_events)
 
         if st.button("Logout"):
