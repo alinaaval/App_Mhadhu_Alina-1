@@ -99,7 +99,8 @@ def app():
                         else:
                             st.write(f"{day:2}", end="  ")
                     st.write()
-                          selected_date = st.session_state['selected_date']
+                          
+        selected_date = st.session_state['selected_date']
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("Previous"):
