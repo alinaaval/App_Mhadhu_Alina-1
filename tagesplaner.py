@@ -112,7 +112,7 @@ def login(username, password):
 def main():
     st.title("Benutzerregistrierung und -anmeldung")
 
-    if show_registration:
+  if show_registration:
         # Benutzerregistrierung
         st.subheader("Registrierung")
         new_username = st.text_input("Benutzername")
@@ -135,4 +135,4 @@ def main():
                 st.error("Ungültige Anmeldeinformationen!")
 
 if __name__ == "__main__":
-    main()
+main()
