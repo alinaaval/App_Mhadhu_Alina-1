@@ -209,4 +209,4 @@ def app():
                 if entry_type == "Task":
                     st.write("**Tasks:**")
                     for index, task in user_tasks.iterrows():
-                        st.markdown()
+                        
