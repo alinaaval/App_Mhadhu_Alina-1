@@ -42,9 +42,8 @@ def logout():
 
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
-    st.title("Tagesansicht")
-    st.write(f"Anzeigen von Informationen für {date.strftime('%Y-%m-%d')}")
-
+    st.title(f"Anzeigen von Informationen für {date}")
+  
     username = st.session_state['username']
 
     # Aufgaben und Termine für den ausgewählten Tag abrufen
