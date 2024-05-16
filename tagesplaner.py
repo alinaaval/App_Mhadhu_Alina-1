@@ -25,7 +25,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -63,14 +63,14 @@ def show_day_view(date):
 
     # Formulare zum Hinzufügen von Aufgaben und Terminen
     st.subheader("Neue Aufgabe hinzufügen")
-    task = st.text_input("Aufgabe")
+    task = st.text_input("Aufgabe", key="task_input")
     if st.button("Aufgabe hinzufügen"):
         add_task(username, date.strftime('%Y-%m-%d'), task)
         st.success("Aufgabe hinzugefügt!")
         st.experimental_rerun()  # Seite neu laden, um die neue Aufgabe anzuzeigen
 
     st.subheader("Neuen Termin hinzufügen")
-    event = st.text_input("Termin")
+    event = st.text_input("Termin", key="event_input")
     if st.button("Termin hinzufügen"):
         add_event(username, date.strftime('%Y-%m-%d'), event)
         st.success("Termin hinzugefügt!")
@@ -115,8 +115,8 @@ def main():
         if st.checkbox("Registrieren"):
             # Benutzerregistrierung
             st.subheader("Registrierung")
-            new_username = st.text_input("Benutzername")
-            new_password = st.text_input("Passwort", type="password")
+            new_username = st.text_input("Benutzername", key="register_username")
+            new_password = st.text_input("Passwort", type="password", key="register_password")
             if st.button("Registrieren"):
                 if register(new_username, new_password):
                     st.success("Registrierung erfolgreich!")
@@ -127,7 +127,7 @@ def main():
             st.subheader("Anmeldung")
             login_username = st.text_input("Benutzername", key="login_username")
             login_password = st.text_input("Passwort", type="password", key="login_password")
-            if st.button("Anmelden", key="login_button"):
+            if st.button("Anmelden"):
                 if login(login_username, login_password):
                     st.success("Anmeldung erfolgreich!")
                     st.write("Willkommen zurück,", login_username)
@@ -141,6 +141,7 @@ def main():
 
     if st.button("Ausloggen"):
         logout()
+        st.experimental_rerun()
         return
 
     # Datumsauswahl
