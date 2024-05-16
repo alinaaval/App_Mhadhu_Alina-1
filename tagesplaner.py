@@ -135,16 +135,18 @@ def app():
                 with col:
                     if day != 0:
                         date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
-                        button_color = "background-color: #FFFFFF;"
+                        button_label = f"{day}"
                         day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
-                        if not day_tasks.empty:
-                            if 'High' in day_tasks['importance'].values:
-                                button_color = "background-color: #FF9999;"
-                            elif 'Medium' in day_tasks['importance'].values:
-                                button_color = "background-color: #FFFF99;"
-                            elif 'Low' in day_tasks['importance'].values:
-                                button_color = "background-color: #D3FFD3;"
-                        if st.button(f"{day}", key=date_str, help=date_str):
+                        day_events = get_events_by_date(st.session_state['username'], date_str)
+                        if not day_tasks.empty or not day_events.empty:
+                            task_importance = day_tasks['importance'].values if not day_tasks.empty else None
+                            event_priority = day_events['priority'].values if not day_events.empty else None
+                            if 'High' in task_importance or 'Dringend' in event_priority:
+                                button_label = f"**{day}**"
+                            elif 'Medium' in task_importance:
+                                button_label = f"*{day}*"
+                            col.markdown(f"<button>{button_label}</button>", unsafe_allow_html=True)
+                        if st.button(button_label, key=date_str, help=date_str):
                             st.session_state['current_date'] = date_str
 
         # Show selected day details
@@ -201,5 +203,13 @@ def app():
                         f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
                         unsafe_allow_html=True
                     )
+            else:
+                st.write("No events for this day.")
 
-app()
+        if st.button("Logout"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.info("Logged out successfully.")
+
+if __name__ == "__main__":
+    app()
