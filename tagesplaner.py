@@ -53,18 +53,16 @@ def main():
         else:
             st.error("Benutzername bereits vergeben!")
 
-    # Benutzeranmeldung
-    st.subheader("Anmeldung")
-    username = st.text_input("Benutzername")
-    password = st.text_input("Passwort", type="password")
-    if st.button("Anmelden"):
-        if login(username, password):
-            st.success("Anmeldung erfolgreich!")
-            st.write("Willkommen zurück,", username)
-        else:
-            st.error("Ungültige Anmeldeinformationen!")
-
-username = st.text_input("Benutzername", key="username_input")
+# Benutzeranmeldung
+st.subheader("Anmeldung")
+login_username = st.text_input("Benutzername", key="login_username")
+login_password = st.text_input("Passwort", type="password", key="login_password")
+if st.button("Anmelden", key="login_button"):
+    if login(login_username, login_password):
+        st.success("Anmeldung erfolgreich!")
+        st.write("Willkommen zurück,", login_username)
+    else:
+        st.error("Ungültige Anmeldeinformationen!")
 
 
 if __name__ == "__main__":
