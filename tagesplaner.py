@@ -33,6 +33,10 @@ def login(username, password):
     c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
     return c.fetchone() is not None
 
+# Funktion zum Ausloggen
+def logout():
+    st.session_state['authenticated'] = False
+
 # Streamlit-Anwendung
 def main():
     if 'authenticated' not in st.session_state:
@@ -66,6 +70,10 @@ def main():
         return
 
     st.title("Kalender App")
+
+    if st.button("Ausloggen"):
+        logout()
+        return
 
     # Date selection
     selected_date = st.date_input("Datum", value=datetime.today())
