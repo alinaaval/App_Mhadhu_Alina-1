@@ -86,4 +86,55 @@ def main():
             if st.button("Anmelden", key="login_button"):
                 if login(login_username, login_password):
                     st.success("Anmeldung erfolgreich!")
-     
+                    st.write("Willkommen zurück,", login_username)
+                    st.session_state['authenticated'] = True
+                else:
+                    st.error("Ungültige Anmeldeinformationen!")
+        return
+
+    st.title("Kalender App")
+
+    if st.button("Ausloggen"):
+        logout()
+        return
+
+    # Date selection
+    selected_date = st.date_input("Datum", value=datetime.today())
+
+    if selected_date:
+        year, month, _ = selected_date.year, selected_date.month, selected_date.day
+
+        # Show calendar
+        st.subheader(calendar.month_name[month] + " " + str(year))
+        cal = calendar.monthcalendar(year, month)
+        for week in cal:
+            cols = st.columns(7)
+            for day in week:
+                if day != 0:
+                    date = datetime(year, month, day)
+                    if cols[calendar.weekday(year, month, day)].button(str(day)):
+                        show_day_view(date)
+
+        # Previous and Next Month Buttons
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("Vorheriger Monat"):
+                year, month = previous_month(year, month)
+                selected_date = datetime(year, month, 1)
+        with col3:
+            if st.button("Nächster Monat"):
+                year, month = next_month(year, month)
+                selected_date = datetime(year, month, 1)
+
+# Funktion zur Aufgabenhinzufügung
+def add_task(username, date, task):
+    c.execute("INSERT INTO tasks (username, date, task) VALUES (?, ?, ?)", (username, date, task))
+    conn.commit()
+
+# Funktion zur Terminhinzufügung
+def add_event(username, date, event):
+    c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
+    conn.commit()
+
+if __name__ == "__main__":
+    main()
