@@ -89,7 +89,7 @@ def app():
         </style>
         """, unsafe_allow_html=True)
     
-    if _name_ == "_main_":
+if _name_ == "_main_":
     app()
 
 import streamlit as st
