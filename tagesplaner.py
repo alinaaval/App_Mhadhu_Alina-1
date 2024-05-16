@@ -76,4 +76,28 @@ def app():
         new_username = st.text_input("Benutzername")
         new_password = st.text_input("Passwort", type="password")
         if st.button("Registrieren"):
-            if regist:
+            if register(new_username, new_password):
+                st.success("Registrierung erfolgreich!")
+            else:
+                st.error("Benutzername bereits vergeben!")
+    else:
+        # Benutzeranmeldung
+        st.subheader("Anmeldung")
+        login_username = st.text_input("Benutzername", key="login_username")
+        login_password = st.text_input("Passwort", type="password", key="login_password")
+        if st.button("Anmelden", key="login_button"):
+            if login(login_username, login_password):
+                st.success("Anmeldung erfolgreich!")
+                st.write("Willkommen zurück,", login_username)
+                
+                # Zeige den Kalender für den aktuellen Monat an
+                today = datetime.today()
+                year, month = today.year, today.month
+                cal_df = calendar_view(year, month)
+                st.write("**Kalenderansicht für", calendar.month_name[month], year, ":**")
+                st.dataframe(cal_df)
+            else:
+                st.error("Ungültige Anmeldeinformationen!")
+
+if __name__ == "__main__":
+    app()
