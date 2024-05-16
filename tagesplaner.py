@@ -55,13 +55,22 @@ def calendar_view(year, month):
     return cal
 
 def app():
-    # Custom CSS for pastel pink gradient
+    # Custom CSS for pastel pink gradient and other styling
     st.markdown("""
         <style>
         html, body, [class*="css"] {
             height: 100%;
             background: linear-gradient(180deg, #FFC0CB, #FFB6C1, #FF69B4, #FF1493, #FFC0CB);
             color: #4B0082;
+        }
+        .low-importance {
+            background-color: #D3FFD3;
+        }
+        .medium-importance {
+            background-color: #FFFF99;
+        }
+        .high-importance {
+            background-color: #FF9999;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -112,7 +121,16 @@ def app():
                 with col:
                     if day != 0:
                         date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
-                        if st.button(f"{day}", key=date_str):
+                        button_color = "style='background-color: #FFFFFF;'"
+                        day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
+                        if not day_tasks.empty:
+                            if 'High' in day_tasks['importance'].values:
+                                button_color = "style='background-color: #FF9999;'"
+                            elif 'Medium' in day_tasks['importance'].values:
+                                button_color = "style='background-color: #FFFF99;'"
+                            elif 'Low' in day_tasks['importance'].values:
+                                button_color = "style='background-color: #D3FFD3;'"
+                        if st.button(f"{day}", key=date_str, help=date_str, unsafe_allow_html=True):
                             st.session_state['current_date'] = date_str
 
         # Show selected day details
@@ -124,11 +142,47 @@ def app():
             
             st.write("**Tasks:**")
             if not user_tasks.empty:
-                st.dataframe(user_tasks)
+                for index, task in user_tasks.iterrows():
+                    st.markdown(
+                        f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
+                        unsafe_allow_html=True
+                    )
             else:
                 st.write("No tasks for this day.")
             
             st.write("**Add a new task:**")
             task_desc = st.text_input("Task Description")
-            task_importance = st.selectbox("Importance", ["Low", "M
+            task_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
+            if st.button("Add Task"):
+                add_task(st.session_state['username'], current_date, task_desc, task_importance)
+                st.success("Task added successfully")
+                # Refresh the task list after adding
+                user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
+                for index, task in user_tasks.iterrows():
+                    st.markdown(
+                        f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
+                        unsafe_allow_html=True
+                    )
 
+            st.write("**Events:**")
+            if not user_events.empty:
+                st.dataframe(user_events)
+            else:
+                st.write("No events for this day.")
+
+            st.write("**Add a new event:**")
+            event_desc = st.text_input("Event Description")
+            if st.button("Add Event"):
+                add_event(st.session_state['username'], current_date, event_desc)
+                st.success("Event added successfully")
+                # Refresh the event list after adding
+                user_events = get_events_by_date(st.session_state['username'], current_date)
+                st.dataframe(user_events)
+
+        if st.button("Logout"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.info("Logged out successfully.")
+
+if __name__ == "__main__":
+    app()
