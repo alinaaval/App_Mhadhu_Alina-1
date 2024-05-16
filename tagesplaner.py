@@ -61,9 +61,9 @@ def main():
             if login(login_username, login_password):
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
-             def calendar_view(year, month):
-               cal = calendar.monthcalendar(year, month)
-               return cal 
+              def calendar_view(year, month):
+              cal = calendar.monthcalendar(year, month)
+              return cal 
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
