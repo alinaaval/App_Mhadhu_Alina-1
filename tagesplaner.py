@@ -130,33 +130,5 @@ def app():
             
             st.write("**Add a new task:**")
             task_desc = st.text_input("Task Description")
-            task_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
-            if st.button("Add Task"):
-                add_task(st.session_state['username'], current_date, task_desc, task_importance)
-                st.success("Task added successfully")
-                # Refresh the task list after adding
-                user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
-                st.dataframe(user_tasks)
+            task_importance = st.selectbox("Importance", ["Low", "M
 
-            st.write("**Events:**")
-            if not user_events.empty:
-                st.dataframe(user_events)
-            else:
-                st.write("No events for this day.")
-
-            st.write("**Add a new event:**")
-            event_desc = st.text_input("Event Description")
-            if st.button("Add Event"):
-                add_event(st.session_state['username'], current_date, event_desc)
-                st.success("Event added successfully")
-                # Refresh the event list after adding
-                user_events = get_events_by_date(st.session_state['username'], current_date)
-                st.dataframe(user_events)
-
-        if st.button("Logout"):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.info("Logged out successfully.")
-
-if __name__ == "__main__":
-    app()
