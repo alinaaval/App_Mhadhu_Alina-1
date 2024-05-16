@@ -72,27 +72,7 @@ def app():
         </style>
         """, unsafe_allow_html=True)
     
-    st.title("Task and Event Manager")
-
-    if 'logged_in' not in st.session_state:
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        if st.button("Login"):
-            if authenticate(username, password):
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = username
-                st.session_state['selected_date'] = datetime.today()
-                st.success("Logged in successfully")
-            else:
-                st.error("Invalid username or password")
-        if st.button("Register"):
-            if add_user(username, password):
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = username
-                st.session_state['selected_date'] = datetime.today()
-                st.success("Registration successful. You are now logged in.")
-            else:
-                st.error("Username already taken")
+    
     else:
         # Display month navigation and calendar
         selected_date = st.session_state['selected_date']
