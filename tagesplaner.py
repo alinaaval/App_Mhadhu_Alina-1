@@ -213,6 +213,20 @@ def app():
 
 if __name__ == "__main__":
     app()
+    
+import sqlite3
 
+# Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
+conn = sqlite3.connect('user_data.db')
+
+# Cursor-Objekt erstellen, um Befehle auszuführen
+c = conn.cursor()
+
+# Tabelle für Benutzer erstellen, falls sie noch nicht existiert
+c.execute('''CREATE TABLE IF NOT EXISTS users
+             (id INTEGER PRIMARY KEY, username TEXT, password TEXT)''')
+
+# Datenbankverbindung schließen
+conn.close()
 
 
