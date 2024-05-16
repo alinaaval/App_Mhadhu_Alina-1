@@ -99,42 +99,32 @@ def main():
         return
 
     # Date selection
-    selected_date = st.date_input("Datum", value=datetime.today())
+    if 'selected_date' not in st.session_state:
+        st.session_state['selected_date'] = datetime.today()
 
-    if selected_date:
-        year, month, _ = selected_date.year, selected_date.month, selected_date.day
+    selected_date = st.session_state['selected_date']
 
-        # Show calendar
-        st.subheader(calendar.month_name[month] + " " + str(year))
-        cal = calendar.monthcalendar(year, month)
-        for week in cal:
-            cols = st.columns(7)
-            for day in week:
-                if day != 0:
-                    date = datetime(year, month, day)
-                    if cols[calendar.weekday(year, month, day)].button(str(day)):
-                        show_day_view(date)
+    if st.button("Vorheriger Monat"):
+        year, month = previous_month(selected_date.year, selected_date.month)
+        selected_date = datetime(year, month, 1)
+        st.session_state['selected_date'] = selected_date
 
-        # Previous and Next Month Buttons
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button("Vorheriger Monat"):
-                year, month = previous_month(year, month)
-                selected_date = datetime(year, month, 1)
-        with col3:
-            if st.button("Nächster Monat"):
-                year, month = next_month(year, month)
-                selected_date = datetime(year, month, 1)
+    if st.button("Nächster Monat"):
+        year, month = next_month(selected_date.year, selected_date.month)
+        selected_date = datetime(year, month, 1)
+        st.session_state['selected_date'] = selected_date
 
-# Funktion zur Aufgabenhinzufügung
-def add_task(username, date, task):
-    c.execute("INSERT INTO tasks (username, date, task) VALUES (?, ?, ?)", (username, date, task))
-    conn.commit()
-
-# Funktion zur Terminhinzufügung
-def add_event(username, date, event):
-    c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
-    conn.commit()
+    # Show calendar
+    year, month = selected_date.year, selected_date.month
+    st.subheader(calendar.month_name[month] + " " + str(year))
+    cal = calendar.monthcalendar(year, month)
+    for week in cal:
+        cols = st.columns(7)
+        for day in week:
+            if day != 0:
+                date = datetime(year, month, day)
+                if cols[calendar.weekday(year, month, day)].button(str(day)):
+                    show_day_view(date)
 
 if __name__ == "__main__":
     main()
