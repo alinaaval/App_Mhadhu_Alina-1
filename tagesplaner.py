@@ -42,38 +42,7 @@ def logout():
 
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
-    st.title(f"Anzeigen von Informationen für {date}")
-  
-    username = st.session_state['username']
-
-    # Aufgaben und Termine für den ausgewählten Tag abrufen
-    c.execute("SELECT task FROM tasks WHERE username=? AND date=?", (username, date.strftime('%Y-%m-%d')))
-    tasks = c.fetchall()
-    c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date.strftime('%Y-%m-%d')))
-    events = c.fetchall()
-
-    st.subheader("Aufgaben")
-    for task in tasks:
-        st.write(task[0])
-
-    st.subheader("Termine")
-    for event in events:
-        st.write(event[0])
-
-    # Formulare zum Hinzufügen von Aufgaben und Terminen
-    st.subheader("Neue Aufgabe hinzufügen")
-    task = st.text_input("Aufgabe", key="task_input")
-    if st.button("Aufgabe hinzufügen"):
-        add_task(username, date.strftime('%Y-%m-%d'), task)
-        st.success("Aufgabe hinzugefügt!")
-        st.experimental_rerun()  # Seite neu laden, um die neue Aufgabe anzuzeigen
-
-    st.subheader("Neuen Termin hinzufügen")
-    event = st.text_input("Termin", key="event_input")
-    if st.button("Termin hinzufügen"):
-        add_event(username, date.strftime('%Y-%m-%d'), event)
-        st.success("Termin hinzugefügt!")
-        st.experimental_rerun()  # Seite neu laden, um den neuen Termin anzuzeigen
+    st.title(f"Termine und Aufgaben für {date}")
 
 # Funktion zur Berechnung des nächsten Monats
 def next_month(current_year, current_month):
