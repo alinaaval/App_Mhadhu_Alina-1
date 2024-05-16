@@ -8,7 +8,22 @@ users = pd.DataFrame(columns=['username', 'password'])
 tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
 events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
 
+def authenticate(username, password):
+    global users
+    """Check if the user credentials are valid."""
+    user_data = users[users['username'] == username]
+    if not user_data.empty:
+        return user_data.iloc[0]['password'] == password
+    return False
 
+def add_user(username, password):
+    global users
+    """Add a new user to the DataFrame."""
+    if username not in users['username'].values:
+        new_user = pd.DataFrame({'username': [username], 'password': [password]})
+        users = pd.concat([users, new_user], ignore_index=True)
+        return True
+    return False
 
 def add_task(username, date, description, importance):
     global tasks
@@ -74,7 +89,7 @@ def app():
         </style>
         """, unsafe_allow_html=True)
     
-   
+    st.title("Task and Event Manager")
 
     if 'logged_in' not in st.session_state:
         username = st.text_input("Username")
@@ -254,4 +269,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
