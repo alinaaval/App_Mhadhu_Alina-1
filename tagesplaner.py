@@ -240,4 +240,40 @@ def add_user(username, password):
 
 # Beispielaufruf der Funktion
 add_user("benutzername", "passwort")
+import sqlite3
+
+def authenticate(username, password):
+    conn = sqlite3.connect('user_data.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE username=?", (username,))
+    user = c.fetchone()
+    conn.close()
+    if user:
+        return user[2] == password  # Vergleichen des Passworts
+    return False
+
+# Beispielaufruf der Funktion
+is_authenticated = authenticate("benutzername", "passwort")
+print(is_authenticated)
+
+import sqlite3
+
+def add_task(username, date, description, importance):
+    conn = sqlite3.connect('user_data.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO tasks (username, date, description, importance) VALUES (?, ?, ?, ?)", (username, date, description, importance))
+    conn.commit()
+    conn.close()
+
+def add_event(username, date, description, priority):
+    conn = sqlite3.connect('user_data.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO events (username, date, description, priority) VALUES (?, ?, ?, ?)", (username, date, description, priority))
+    conn.commit()
+    conn.close()
+
+# Beispielaufrufe der Funktionen
+add_task("benutzername", "2024-05-17", "Beschreibung der Aufgabe", "Medium")
+add_event("benutzername", "2024-05-18", "Beschreibung des Ereignisses", "Dringend")
+
 
