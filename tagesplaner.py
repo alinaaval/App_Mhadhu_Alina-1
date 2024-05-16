@@ -42,53 +42,51 @@ def calendar_view(year, month):
 
 def show_calendar():
     st.title("Kalender")
-          # Display month navigation and calendar
-        selected_date = st.session_state['selected_date']
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("Previous"):
-                selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
-                st.session_state['selected_date'] = selected_date
-        with col2:
-            st.write(selected_date.strftime("%B %Y"))
-        with col3:
-            if st.button("Next"):
-                selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
-                selected_date = selected_date.replace(day=1)
-                st.session_state['selected_date'] = selected_date
+    # Display month navigation and calendar
+    selected_date = st.session_state['selected_date']
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("Previous"):
+            selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
+            st.session_state['selected_date'] = selected_date
+    with col2:
+        st.write(selected_date.strftime("%B %Y"))
+    with col3:
+        if st.button("Next"):
+            selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
+            selected_date = selected_date.replace(day=1)
+            st.session_state['selected_date'] = selected_date
 
-        # Show calendar
-        cal = calendar_view(selected_date.year, selected_date.month)
-        st.write("**Click on a day to add/view tasks and events**")
-        for week in cal:
-            cols = st.columns(7)
-            for day, col in zip(week, cols):
-                with col:
-                    if day != 0:
-                        date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
-                        button_label = f"{day}"
-                        day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
-                        day_events = get_events_by_date(st.session_state['username'], date_str)
-                        if not day_tasks.empty or not day_events.empty:
-                            task_importance = day_tasks['importance'].values if not day_tasks.empty else None
-                            event_priority = day_events['priority'].values if not day_events.empty else None
-                            if 'High' in task_importance or 'Dringend' in event_priority:
-                                button_label = f"**{day}**"
-                            elif 'Medium' in task_importance:
-                                button_label = f"*{day}*"
-                            col.markdown(f"<button>{button_label}</button>", unsafe_allow_html=True)
-                        if st.button(button_label, key=date_str, help=date_str):
-                            st.session_state['current_date'] = date_str
+    # Show calendar
+    cal = calendar_view(selected_date.year, selected_date.month)
+    st.write("**Click on a day to add/view tasks and events**")
+    for week in cal:
+        cols = st.columns(7)
+        for day, col in zip(week, cols):
+            with col:
+                if day != 0:
+                    date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
+                    button_label = f"{day}"
+                    day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
+                    day_events = get_events_by_date(st.session_state['username'], date_str)
+                    if not day_tasks.empty or not day_events.empty:
+                        task_importance = day_tasks['importance'].values if not day_tasks.empty else None
+                        event_priority = day_events['priority'].values if not day_events.empty else None
+                        if 'High' in task_importance or 'Dringend' in event_priority:
+                            button_label = f"**{day}**"
+                        elif 'Medium' in task_importance:
+                            button_label = f"*{day}*"
+                        col.markdown(f"<button>{button_label}</button>", unsafe_allow_html=True)
+                    if st.button(button_label, key=date_str, help=date_str):
+                        st.session_state['current_date'] = date_str
 
-        # Show selected day details
-        if 'current_date' in st.session_state:
-            current_date = st.session_state['current_date']
-            st.subheader(f"Details for {current_date}")
-            user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
-            user_events = get_events_by_date(st.session_state['username'], current_date)
+    # Show selected day details
+    if 'current_date' in st.session_state:
+        current_date = st.session_state['current_date']
+        st.subheader(f"Details for {current_date}")
+        user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
+        user_events = get_events_by_date(st.session_state['username'], current_date)
 
-  
-   
                         
 def app():
     # Custom CSS for pastel pink gradient and other styling
