@@ -223,7 +223,7 @@ c = conn.cursor()
 
 # Tabelle für Benutzer erstellen, falls sie noch nicht existiert
 c.execute('''CREATE TABLE IF NOT EXISTS users
-             (id INTEGER PRIMARY KEY, username TEXT, password TEXT)''')
+             (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
 conn.commit()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
@@ -266,8 +266,10 @@ def main():
     if st.button("Anmelden"):
         if login(username, password):
             st.success("Anmeldung erfolgreich!")
+            st.write("Willkommen zurück,", username)
         else:
             st.error("Ungültige Anmeldeinformationen!")
 
 if __name__ == "__main__":
     main()
+
