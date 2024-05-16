@@ -86,45 +86,4 @@ def main():
             if st.button("Anmelden", key="login_button"):
                 if login(login_username, login_password):
                     st.success("Anmeldung erfolgreich!")
-                    st.write("Willkommen zurück,", login_username)
-                    st.session_state['authenticated'] = True
-                else:
-                    st.error("Ungültige Anmeldeinformationen!")
-        return
-
-    st.title("Kalender App")
-
-    if st.button("Ausloggen"):
-        logout()
-        return
-
-    # Date selection
-    if 'selected_date' not in st.session_state:
-        st.session_state['selected_date'] = datetime.today()
-
-    selected_date = st.session_state['selected_date']
-
-    if st.button("Vorheriger Monat"):
-        year, month = previous_month(selected_date.year, selected_date.month)
-        selected_date = datetime(year, month, 1)
-        st.session_state['selected_date'] = selected_date
-
-    if st.button("Nächster Monat"):
-        year, month = next_month(selected_date.year, selected_date.month)
-        selected_date = datetime(year, month, 1)
-        st.session_state['selected_date'] = selected_date
-
-    # Show calendar
-    year, month = selected_date.year, selected_date.month
-    st.subheader(calendar.month_name[month] + " " + str(year))
-    cal = calendar.monthcalendar(year, month)
-    for week in cal:
-        cols = st.columns(7)
-        for day in week:
-            if day != 0:
-                date = datetime(year, month, day)
-                if cols[calendar.weekday(year, month, day)].button(str(day)):
-                    show_day_view(date)
-
-if __name__ == "__main__":
-    main()
+     
