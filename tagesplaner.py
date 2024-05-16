@@ -42,7 +42,7 @@ def calendar_view(year, month):
 
 def show_calendar():
     st.title("Kalender")
-            cal = calendar_view(selected_date.year, selected_date.month)
+    cal = calendar_view(selected_date.year, selected_date.month)
         st.write("**Click on a day to add/view tasks and events**")
         for week in cal:
             cols = st.columns(7)
