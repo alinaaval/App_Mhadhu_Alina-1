@@ -3,57 +3,50 @@ import pandas as pd
 import calendar
 from datetime import datetime
 
-# Initialize session state if not already done
-if 'users' not in st.session_state:
-    st.session_state['users'] = pd.DataFrame(columns=['username', 'password'])
-
-if 'tasks' not in st.session_state:
-    st.session_state['tasks'] = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
-
-if 'events' not in st.session_state:
-    st.session_state['events'] = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
+# Global DataFrames initialized
+users = pd.DataFrame(columns=['username', 'password'])
+tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
+events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
 
 def authenticate(username, password):
+    global users
     """Check if the user credentials are valid."""
-    users = st.session_state['users']
     user_data = users[users['username'] == username]
     if not user_data.empty:
         return user_data.iloc[0]['password'] == password
     return False
 
 def add_user(username, password):
+    global users
     """Add a new user to the DataFrame."""
-    users = st.session_state['users']
     if username not in users['username'].values:
         new_user = pd.DataFrame({'username': [username], 'password': [password]})
-        st.session_state['users'] = pd.concat([users, new_user], ignore_index=True)
+        users = pd.concat([users, new_user], ignore_index=True)
         return True
     return False
 
 def add_task(username, date, description, importance):
+    global tasks
     """Add a new task to the DataFrame."""
-    tasks = st.session_state['tasks']
     new_task = pd.DataFrame({
         'username': [username], 'date': [date], 'description': [description], 'importance': [importance]
     })
-    st.session_state['tasks'] = pd.concat([tasks, new_task], ignore_index=True)
+    tasks = pd.concat([tasks, new_task], ignore_index=True)
 
 def add_event(username, date, description, priority):
+    global events
     """Add a new event to the DataFrame."""
-    events = st.session_state['events']
     new_event = pd.DataFrame({
         'username': [username], 'date': [date], 'description': [description], 'priority': [priority]
     })
-    st.session_state['events'] = pd.concat([events, new_event], ignore_index=True)
+    events = pd.concat([events, new_event], ignore_index=True)
 
 def get_tasks_by_date(username, date):
     """Retrieve tasks for the logged-in user for a specific date."""
-    tasks = st.session_state['tasks']
     return tasks[(tasks['username'] == username) & (tasks['date'] == date)]
 
 def get_events_by_date(username, date):
     """Retrieve events for the logged-in user for a specific date."""
-    events = st.session_state['events']
     return events[(events['username'] == username) & (events['date'] == date)]
 
 def calendar_view(year, month):
@@ -197,5 +190,26 @@ def app():
                         )
                 else:
                     st.write("**Events:**")
-                    for index,
+                    for index, event in user_events.iterrows():
+                        st.markdown(
+                            f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                            unsafe_allow_html=True
+                        )
 
+            st.write("**Events:**")
+            if not user_events.empty:
+                for index, event in user_events.iterrows():
+                    st.markdown(
+                        f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.write("No events for this day.")
+
+        if st.button("Logout"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.info("Logged out successfully.")
+
+if __name__ == "__main__":
+    app()
