@@ -85,6 +85,7 @@ def app():
             if login(login_username, login_password):
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
+              
                 
                 # Zeige den Kalender für den aktuellen Monat an
                 today = datetime.today()
@@ -98,6 +99,35 @@ def app():
                         else:
                             st.write(f"{day:2}", end="  ")
                     st.write()
+                          selected_date = st.session_state['selected_date']
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("Previous"):
+                selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
+                st.session_state['selected_date'] = selected_date
+        with col2:
+            st.write(selected_date.strftime("%B %Y"))
+        with col3:
+            if st.button("Next"):
+                selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
+                selected_date = selected_date.replace(day=1)
+                st.session_state['selected_date'] = selected_date
+
+        # Show calendar
+        cal = calendar_view(selected_date.year, selected_date.month)
+        st.write("**Click on a day to add/view tasks and events**")
+        for week in cal:
+            cols = st.columns(7)
+            for day, col in zip(week, cols):
+                with col:
+                    if day != 0:
+                        date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
+                        button_label = f"{day}"
+                        day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
+                        day_events = get_events_by_date(st.session_state['username'], date_str)
+                        if not day_tasks.empty or not day_events.empty:
+                            task_importance = day_tasks['importance'].values if not day_tasks.empty else 
+
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
