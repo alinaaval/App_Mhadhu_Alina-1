@@ -81,44 +81,41 @@ def main():
                     st.write("Hier ist der interaktive Kalender:")
                     st.write("Klicken Sie auf einen Tag, um eine Aufgabe oder einen Termin hinzuzufügen.")
 
-                    # Anzeige des Fullcalendar-Widgets
-                    st.write("""<div id='calendar'></div>""", unsafe_allow_html=True)
-
-                    # JavaScript-Code für die Konfiguration des Fullcalendar-Widgets
-                    js_code = f"""
+                    # Einbetten des Fullcalendar-Widgets
+                    st.components.html("""
+                        <div id='calendar'></div>
                         <script>
-                        document.addEventListener('DOMContentLoaded', function() {{
+                        document.addEventListener('DOMContentLoaded', function() {
                             var calendarEl = document.getElementById('calendar');
-                            var calendar = new FullCalendar.Calendar(calendarEl, {{
+                            var calendar = new FullCalendar.Calendar(calendarEl, {
                                 initialView: 'dayGridMonth',
                                 selectable: true,
-                                dateClick: function(info) {{
+                                dateClick: function(info) {
                                     var date = info.dateStr;
                                     var description = prompt('Beschreibung eingeben:');
                                     var priority = prompt('Priorität eingeben (Niedrig, Mittel, Hoch):');
-                                    var username = '{login_username}';
-                                    if (description && priority) {{
+                                    var username = '%s';
+                                    if (description && priority) {
                                         var url = 'http://localhost:8501/add_task_event/' + username + '/' + date + '/' + description + '/' + priority;
                                         fetch(url);
                                         calendar.refetchEvents();
-                                    }}
-                                }},
-                                eventSources: [{{
-                                    url: 'http://localhost:8501/get_tasks_events/{login_username}',
+                                    }
+                                },
+                                eventSources: [{
+                                    url: 'http://localhost:8501/get_tasks_events/%s',
                                     method: 'GET',
-                                    extraParams: {{
+                                    extraParams: {
                                         cacheBuster: new Date().toISOString()
-                                    }},
-                                    failure: function() {{
+                                    },
+                                    failure: function() {
                                         alert('Fehler beim Laden von Aufgaben und Terminen.');
-                                    }},
-                                }}],
-                            }});
+                                    },
+                                }],
+                            });
                             calendar.render();
-                        }});
+                        });
                         </script>
-                    """
-                    st.write(js_code, unsafe_allow_html=True)
+                    """ % (login_username, login_username), width=800, height=600)
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
