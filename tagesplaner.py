@@ -51,21 +51,14 @@ def next_month(current_year, current_month):
         next_month_year += 1
     return next_month_year, next_month
 
-# Date selection
-    if 'selected_date' not in st.session_state:
-        st.session_state['selected_date'] = datetime.today()
-
-    selected_date = st.session_state['selected_date']
-
-    if st.button("Vorheriger Monat"):
-        year, month = previous_month(selected_date.year, selected_date.month)
-        selected_date = datetime(year, month, 1)
-        st.session_state['selected_date'] = selected_date
-
-    if st.button("Nächster Monat"):
-        year, month = next_month(selected_date.year, selected_date.month)
-        selected_date = datetime(year, month, 1)
-        st.session_state['selected_date'] = selected_date
+# Funktion zur Berechnung des vorherigen Monats
+def previous_month(current_year, current_month):
+    previous_month_year = current_year
+    previous_month = current_month - 1
+    if previous_month < 1:
+        previous_month = 12
+        previous_month_year -= 1
+    return previous_month_year, previous_month
 
 # Streamlit-Anwendung
 def main():
