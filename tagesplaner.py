@@ -213,68 +213,6 @@ def app():
 
 if __name__ == "__main__":
     app()
-    
-import sqlite3
-
-# Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
-conn = sqlite3.connect('user_data.db')
-
-# Cursor-Objekt erstellen, um Befehle auszuführen
-c = conn.cursor()
-
-# Tabelle für Benutzer erstellen, falls sie noch nicht existiert
-c.execute('''CREATE TABLE IF NOT EXISTS users
-             (id INTEGER PRIMARY KEY, username TEXT, password TEXT)''')
-
-# Datenbankverbindung schließen
-conn.close()
-
-import sqlite3
-
-def add_user(username, password):
-    conn = sqlite3.connect('user_data.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
-    conn.commit()
-    conn.close()
-
-# Beispielaufruf der Funktion
-add_user("benutzername", "passwort")
-import sqlite3
-
-def authenticate(username, password):
-    conn = sqlite3.connect('user_data.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE username=?", (username,))
-    user = c.fetchone()
-    conn.close()
-    if user:
-        return user[2] == password  # Vergleichen des Passworts
-    return False
-
-# Beispielaufruf der Funktion
-is_authenticated = authenticate("benutzername", "passwort")
-print(is_authenticated)
-
-import sqlite3
-
-def add_task(username, date, description, importance):
-    conn = sqlite3.connect('user_data.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO tasks (username, date, description, importance) VALUES (?, ?, ?, ?)", (username, date, description, importance))
-    conn.commit()
-    conn.close()
-
-def add_event(username, date, description, priority):
-    conn = sqlite3.connect('user_data.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO events (username, date, description, priority) VALUES (?, ?, ?, ?)", (username, date, description, priority))
-    conn.commit()
-    conn.close()
-
-# Beispielaufrufe der Funktionen
-add_task("benutzername", "2024-05-17", "Beschreibung der Aufgabe", "Medium")
-add_event("benutzername", "2024-05-18", "Beschreibung des Ereignisses", "Dringend")
 
 import streamlit as st
 import pandas as pd
@@ -325,4 +263,7 @@ def add_event(username, date, description, priority):
 
 if __name__ == "__main__":
     app()
+
+    
+
 
