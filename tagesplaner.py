@@ -112,8 +112,6 @@ def login(username, password):
 def main():
     st.title("Benutzerregistrierung und -anmeldung")
 
-    show_registration = st.checkbox("Registrieren")
-
     if show_registration:
         # Benutzerregistrierung
         st.subheader("Registrierung")
