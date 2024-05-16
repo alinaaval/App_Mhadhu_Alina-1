@@ -89,7 +89,7 @@ def app():
         </style>
         """, unsafe_allow_html=True)
     
-    st.title("Task and Event Manager")
+   
 
     if 'logged_in' not in st.session_state:
         username = st.text_input("Username")
