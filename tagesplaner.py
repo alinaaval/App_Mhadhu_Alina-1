@@ -4,7 +4,6 @@ import calendar
 from datetime import datetime
 
 # Global DataFrames initialized
-users = pd.DataFrame(columns=['username', 'password'])
 tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
 events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
 
