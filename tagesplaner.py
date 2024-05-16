@@ -157,7 +157,7 @@ if st.button("Register"):
                 st.success("Registration successful. You are now logged in.")
             else:
                 st.error("Username already taken")
-    else:
+else:
         # Display month navigation and calendar
         selected_date = st.session_state['selected_date']
         col1, col2, col3 = st.columns(3)
@@ -196,8 +196,8 @@ if st.button("Register"):
                         if st.button(button_label, key=date_str, help=date_str):
                             st.session_state['current_date'] = date_str
 
-        # Show selected day details
-        if 'current_date' in st.session_state:
+# Show selected day details
+            if 'current_date' in st.session_state:
             current_date = st.session_state['current_date']
             st.subheader(f"Details for {current_date}")
             user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
