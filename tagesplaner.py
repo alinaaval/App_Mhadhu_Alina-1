@@ -68,7 +68,7 @@ def app():
         </style>
         """, unsafe_allow_html=True)
 
-    st.title("Benutzerregistrierung und -anmeldung")
+    st.title("Kalender App")
 
     if st.checkbox("Registrieren"):
         # Benutzerregistrierung
@@ -90,8 +90,14 @@ def app():
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
                 
-                # Generiere Link zum Öffnen des Kalenders in einem neuen Fenster
-                st.write("[Öffne Kalender](https://fullcalendar.io/js/fullcalendar-scheduler-5.10.0/demo)", target="_blank")
+                # Button zum Öffnen des Kalenders
+                if st.button("Kalender öffnen"):
+                    # Zeige den Kalender für den aktuellen Monat an
+                    today = datetime.today()
+                    year, month = today.year, today.month
+                    cal_df = calendar_view(year, month)
+                    st.write("**Kalenderansicht für", calendar.month_name[month], year, ":**")
+                    st.dataframe(cal_df)
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
