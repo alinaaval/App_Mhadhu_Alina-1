@@ -73,21 +73,7 @@ def app():
         """, unsafe_allow_html=True)
     
     
-    else:
-        # Display month navigation and calendar
-        selected_date = st.session_state['selected_date']
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("Previous"):
-                selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
-                st.session_state['selected_date'] = selected_date
-        with col2:
-            st.write(selected_date.strftime("%B %Y"))
-        with col3:
-            if st.button("Next"):
-                selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
-                selected_date = selected_date.replace(day=1)
-                st.session_state['selected_date'] = selected_date
+
 
         # Show calendar
         cal = calendar_view(selected_date.year, selected_date.month)
