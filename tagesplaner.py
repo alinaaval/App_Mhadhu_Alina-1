@@ -1,52 +1,53 @@
 import streamlit as st
 import pandas as pd
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 
-# Initialization of session state for global DataFrames
-if 'users' not in st.session_state:
-    st.session_state['users'] = pd.DataFrame(columns=['username', 'password'])
-if 'tasks' not in st.session_state:
-    st.session_state['tasks'] = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
-if 'events' not in st.session_state:
-    st.session_state['events'] = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
+# Global DataFrames initialized
+users = pd.DataFrame(columns=['username', 'password'])
+tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
+events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
 
 def authenticate(username, password):
+    global users
     """Check if the user credentials are valid."""
-    user_data = st.session_state['users'][st.session_state['users']['username'] == username]
+    user_data = users[users['username'] == username]
     if not user_data.empty:
         return user_data.iloc[0]['password'] == password
     return False
 
 def add_user(username, password):
+    global users
     """Add a new user to the DataFrame."""
-    if username not in st.session_state['users']['username'].values:
+    if username not in users['username'].values:
         new_user = pd.DataFrame({'username': [username], 'password': [password]})
-        st.session_state['users'] = pd.concat([st.session_state['users'], new_user], ignore_index=True)
+        users = pd.concat([users, new_user], ignore_index=True)
         return True
     return False
 
 def add_task(username, date, description, importance):
+    global tasks
     """Add a new task to the DataFrame."""
     new_task = pd.DataFrame({
         'username': [username], 'date': [date], 'description': [description], 'importance': [importance]
     })
-    st.session_state['tasks'] = pd.concat([st.session_state['tasks'], new_task], ignore_index=True)
+    tasks = pd.concat([tasks, new_task], ignore_index=True)
 
 def add_event(username, date, description, priority):
+    global events
     """Add a new event to the DataFrame."""
     new_event = pd.DataFrame({
         'username': [username], 'date': [date], 'description': [description], 'priority': [priority]
     })
-    st.session_state['events'] = pd.concat([st.session_state['events'], new_event], ignore_index=True)
+    events = pd.concat([events, new_event], ignore_index=True)
 
 def get_tasks_by_date(username, date):
     """Retrieve tasks for the logged-in user for a specific date."""
-    return st.session_state['tasks'][(st.session_state['tasks']['username'] == username) & (st.session_state['tasks']['date'] == date)]
+    return tasks[(tasks['username'] == username) & (tasks['date'] == date)]
 
 def get_events_by_date(username, date):
     """Retrieve events for the logged-in user for a specific date."""
-    return st.session_state['events'][(st.session_state['events']['username'] == username) & (st.session_state['events']['date'] == date)]
+    return events[(events['username'] == username) & (events['date'] == date)]
 
 def calendar_view(year, month):
     """Create a calendar view for the given month and year."""
@@ -115,14 +116,14 @@ def app():
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("Previous"):
-                selected_date = selected_date.replace(day=1) - timedelta(days=1)
-                selected_date = selected_date.replace(day=1)
+                selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
                 st.session_state['selected_date'] = selected_date
         with col2:
             st.write(selected_date.strftime("%B %Y"))
         with col3:
             if st.button("Next"):
-                selected_date = (selected_date.replace(day=28) + timedelta(days=4)).replace(day=1)
+                selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
+                selected_date = selected_date.replace(day=1)
                 st.session_state['selected_date'] = selected_date
 
         # Show calendar
@@ -183,4 +184,32 @@ def app():
                 if entry_type == "Task":
                     st.write("**Tasks:**")
                     for index, task in user_tasks.iterrows():
-                       
+                        st.markdown(
+                            f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
+                            unsafe_allow_html=True
+                        )
+                else:
+                    st.write("**Events:**")
+                    for index, event in user_events.iterrows():
+                        st.markdown(
+                            f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                            unsafe_allow_html=True
+                        )
+
+            st.write("**Events:**")
+            if not user_events.empty:
+                for index, event in user_events.iterrows():
+                    st.markdown(
+                        f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.write("No events for this day.")
+
+        if st.button("Logout"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.info("Logged out successfully.")
+
+if __name__ == "__main__":
+    app()
