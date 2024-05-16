@@ -199,4 +199,8 @@ def app():
                 for index, event in user_events.iterrows():
                     st.markdown(
                         f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
-                        unsafe_allow
+                        unsafe_allow_html=True
+                    )
+
+app()
+
