@@ -167,13 +167,12 @@ def app():
                         day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
                         day_events = get_events_by_date(st.session_state['username'], date_str)
                         if not day_tasks.empty or not day_events.empty:
-                            task_importance = day_tasks['importance'].values if not day_tasks.empty else None
-                            event_priority = day_events['priority'].values if not day_events.empty else None
+                            task_importance = day_tasks['importance'].values if not day_tasks.empty else []
+                            event_priority = day_events['priority'].values if not day_events.empty else []
                             if 'High' in task_importance or 'Dringend' in event_priority:
                                 button_label = f"**{day}**"
                             elif 'Medium' in task_importance:
                                 button_label = f"*{day}*"
-                            col.markdown(f"<button>{button_label}</button>", unsafe_allow_html=True)
                         if st.button(button_label, key=date_str, help=date_str):
                             st.session_state['current_date'] = date_str
 
@@ -202,6 +201,4 @@ def app():
                 entry_priority = None
             else:
                 entry_importance = None
-                entry_priority = st.selectbox("Priority", ["Dringend", "kann warten"])
-            if st.button("Add Entry"):
-                add_calendar
+                entry_priority = st.selectbox("Priority
