@@ -10,10 +10,8 @@ def calendar_view(year, month):
 
 def add_calendar_entry(username, date, entry_type, description, importance=None, priority=None):
     """Add a calendar entry which can be a task or an event."""
-    if entry_type == 'Task':
-        add_task(username, date, description, importance)
-    elif entry_type == 'Event':
-        add_event(username, date, description, priority)
+    # Hier müssten die Einträge in einer Datenbank oder einer anderen Form von Datenspeicherung gespeichert werden
+    pass
 
 def app():
     # Custom CSS for pastel pink gradient and other styling
@@ -73,8 +71,8 @@ def app():
     if 'current_date' in st.session_state:
         current_date = st.session_state['current_date']
         st.subheader(f"Details for {current_date}")
-        user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
-        user_events = get_events_by_date(st.session_state['username'], current_date)
+        user_tasks = pd.DataFrame() # Placeholder for tasks
+        user_events = pd.DataFrame() # Placeholder for events
         
         st.write("**Tasks:**")
         if not user_tasks.empty:
@@ -99,8 +97,8 @@ def app():
             add_calendar_entry(st.session_state['username'], current_date, entry_type, entry_desc, entry_importance, entry_priority)
             st.success(f"{entry_type} added successfully")
             # Refresh the task and event list after adding
-            user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
-            user_events = get_events_by_date(st.session_state['username'], current_date)
+            user_tasks = pd.DataFrame() # Placeholder for tasks
+            user_events = pd.DataFrame() # Placeholder for events
             if entry_type == "Task":
                 st.write("**Tasks:**")
                 for index, task in user_tasks.iterrows():
@@ -108,3 +106,13 @@ def app():
                         f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
                         unsafe_allow_html=True
                     )
+                else:
+                    st.write("**Events:**")
+                    for index, event in user_events.iterrows():
+                        st.markdown(
+                            f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                            unsafe_allow_html=True
+                        )
+
+if __name__ == "__main__":
+    app()
