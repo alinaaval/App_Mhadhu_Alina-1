@@ -89,67 +89,20 @@ def app():
         </style>
         """, unsafe_allow_html=True)
     
-if _name_ == "_main_":
-    app()
+    st.title("Task and Event Manager")
 
-import streamlit as st
-import sqlite3
-
-# Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
-conn = sqlite3.connect('user_data.db')
-c = conn.cursor()
-
-conn = sqlite3.connect('my_database.db')
-conn.close()
-
-# Funktion zur Überprüfung, ob ein Benutzer bereits existiert
-def user_exists(username):
-    c.execute("SELECT * FROM users WHERE username=?", (username,))
-    return c.fetchone() is not None
-
-# Funktion zur Registrierung eines neuen Benutzers
-def register(username, password):
-    if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
-        conn.commit()
-        return True
-    else:
-        return False
-
-# Funktion zur Überprüfung der Anmeldeinformationen
-def login(username, password):
-    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-    return c.fetchone() is not None
-
-# Streamlit-Anwendung
-def main():
-    st.title("Benutzerregistrierung und -anmeldung")
-
-    # Benutzerregistrierung
-    st.subheader("Registrierung")
-    new_username = st.text_input("Benutzername")
-    new_password = st.text_input("Passwort", type="password")
-    if st.button("Registrieren"):
-        if register(new_username, new_password):
-            st.success("Registrierung erfolgreich!")
-        else:
-            st.error("Benutzername bereits vergeben!")
-
-    # Benutzeranmeldung
-    st.subheader("Anmeldung")
-    username = st.text_input("Benutzername")
-    password = st.text_input("Passwort", type="password")
-    if st.button("Anmelden"):
-        if login(username, password):
-            st.success("Anmeldung erfolgreich!")
-        else:
-            st.error("Ungültige Anmeldeinformationen!")
-
-if _name_ == "_main_":
-    main()
-
-        
-if st.button("Register"):
+    if 'logged_in' not in st.session_state:
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("Login"):
+            if authenticate(username, password):
+                st.session_state['logged_in'] = True
+                st.session_state['username'] = username
+                st.session_state['selected_date'] = datetime.today()
+                st.success("Logged in successfully")
+            else:
+                st.error("Invalid username or password")
+        if st.button("Register"):
             if add_user(username, password):
                 st.session_state['logged_in'] = True
                 st.session_state['username'] = username
@@ -157,7 +110,7 @@ if st.button("Register"):
                 st.success("Registration successful. You are now logged in.")
             else:
                 st.error("Username already taken")
-else:
+    else:
         # Display month navigation and calendar
         selected_date = st.session_state['selected_date']
         col1, col2, col3 = st.columns(3)
@@ -196,8 +149,8 @@ else:
                         if st.button(button_label, key=date_str, help=date_str):
                             st.session_state['current_date'] = date_str
 
-# Show selected day details
-if 'current_date' in st.session_state:
+        # Show selected day details
+        if 'current_date' in st.session_state:
             current_date = st.session_state['current_date']
             st.subheader(f"Details for {current_date}")
             user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
@@ -210,7 +163,7 @@ if 'current_date' in st.session_state:
                         f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
                         unsafe_allow_html=True
                     )
-else:
+            else:
                 st.write("No tasks for this day.")
             
             st.write("**Add a new task or event:**")
