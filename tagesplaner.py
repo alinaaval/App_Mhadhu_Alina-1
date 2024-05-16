@@ -221,9 +221,8 @@ import sqlite3
 conn = sqlite3.connect('user_data.db')
 c = conn.cursor()
 
-# Tabelle für Benutzer erstellen, falls sie noch nicht existiert
-c.execute('''CREATE TABLE IF NOT EXISTS users
-             (id INTEGER PRIMARY KEY, username TEXT, password TEXT)''')
+conn = sqlite3.connect('my_database.db')
+conn.close()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
