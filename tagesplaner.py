@@ -56,16 +56,7 @@ def app():
     year, month, _ = selected_date.year, selected_date.month, selected_date.day
 
     # Show calendar
-    cal = calendar_view(year, month)
-    for week in cal:
-        cols = st.columns(7)
-        for day, col in zip(week, cols):
-            if day != 0:
-                date_str = f"{year}-{month:02}-{day:02}"
-                button_label = f"{day}"
-                col.markdown(f"<div class='day-button'>{button_label}</div>", unsafe_allow_html=True)
-                if st.button(button_label, key=date_str, help=date_str):
-                    st.session_state['current_date'] = date_str
+
 
    
 
