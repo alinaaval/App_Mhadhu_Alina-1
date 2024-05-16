@@ -40,6 +40,14 @@ def calendar_view(year, month):
     cal_df.columns = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
     return cal_df
 
+def show_calendar_page():
+    st.title("Kalender")
+    today = datetime.today()
+    year, month = today.year, today.month
+    cal_df = calendar_view(year, month)
+    st.write("**Kalenderansicht für", calendar.month_name[month], year, ":**")
+    st.dataframe(cal_df)
+
 def app():
     # Custom CSS for pastel pink gradient and other styling
     st.markdown("""
@@ -92,12 +100,7 @@ def app():
                 
                 # Button zum Öffnen des Kalenders
                 if st.button("Kalender öffnen"):
-                    # Zeige den Kalender für den aktuellen Monat an
-                    today = datetime.today()
-                    year, month = today.year, today.month
-                    cal_df = calendar_view(year, month)
-                    st.write("**Kalenderansicht für", calendar.month_name[month], year, ":**")
-                    st.dataframe(cal_df)
+                    show_calendar_page()
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
