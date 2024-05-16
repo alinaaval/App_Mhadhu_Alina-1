@@ -91,12 +91,12 @@ def app():
                 st.write("Willkommen zurück,", login_username)
                 
                 # Öffne den Kalender in einem neuen Fenster
-                st.sidebar.title("Kalender")
+                st.subheader("Kalender")
+                calendar_container = st.empty()
                 today = datetime.today()
                 year, month = today.year, today.month
                 cal_df = calendar_view(year, month)
-                st.sidebar.write("**Kalenderansicht für", calendar.month_name[month], year, ":**")
-                st.sidebar.dataframe(cal_df)
+                calendar_container.dataframe(cal_df)
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
