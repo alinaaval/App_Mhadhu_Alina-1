@@ -1,7 +1,8 @@
+Aktueller Code: 
 import streamlit as st
 import pandas as pd
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Global DataFrames initialized
 users = pd.DataFrame(columns=['username', 'password'])
@@ -22,7 +23,6 @@ def add_user(username, password):
     if username not in users['username'].values:
         new_user = pd.DataFrame({'username': [username], 'password': [password]})
         users = pd.concat([users, new_user], ignore_index=True)
-        save_data()
         return True
     return False
 
@@ -33,7 +33,6 @@ def add_task(username, date, description, importance):
         'username': [username], 'date': [date], 'description': [description], 'importance': [importance]
     })
     tasks = pd.concat([tasks, new_task], ignore_index=True)
-    save_data()
 
 def add_event(username, date, description, priority):
     global events
@@ -42,7 +41,6 @@ def add_event(username, date, description, priority):
         'username': [username], 'date': [date], 'description': [description], 'priority': [priority]
     })
     events = pd.concat([events, new_event], ignore_index=True)
-    save_data()
 
 def get_tasks_by_date(username, date):
     """Retrieve tasks for the logged-in user for a specific date."""
@@ -64,30 +62,7 @@ def add_calendar_entry(username, date, entry_type, description, importance=None,
     elif entry_type == 'Event':
         add_event(username, date, description, priority)
 
-def save_data():
-    """Save the data to CSV files."""
-    users.to_csv('users.csv', index=False)
-    tasks.to_csv('tasks.csv', index=False)
-    events.to_csv('events.csv', index=False)
-
-def load_data():
-    """Load the data from CSV files."""
-    global users, tasks, events
-    try:
-        users = pd.read_csv('users.csv')
-    except FileNotFoundError:
-        users = pd.DataFrame(columns=['username', 'password'])
-    try:
-        tasks = pd.read_csv('tasks.csv')
-    except FileNotFoundError:
-        tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
-    try:
-        events = pd.read_csv('events.csv')
-    except FileNotFoundError:
-        events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
-
 def app():
-    load_data()
     # Custom CSS for pastel pink gradient and other styling
     st.markdown("""
         <style>
@@ -142,14 +117,14 @@ def app():
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("Previous"):
-                selected_date = selected_date.replace(day=1) - timedelta(days=1)
-                selected_date = selected_date.replace(day=1)
+                selected_date = selected_date.replace(day=1) - pd.DateOffset(months=1)
                 st.session_state['selected_date'] = selected_date
         with col2:
             st.write(selected_date.strftime("%B %Y"))
         with col3:
             if st.button("Next"):
-                selected_date = (selected_date.replace(day=28) + timedelta(days=4)).replace(day=1)
+                selected_date = selected_date.replace(day=28) + pd.DateOffset(days=4)  # ensures it moves to the next month
+                selected_date = selected_date.replace(day=1)
                 st.session_state['selected_date'] = selected_date
 
         # Show calendar
@@ -165,12 +140,13 @@ def app():
                         day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
                         day_events = get_events_by_date(st.session_state['username'], date_str)
                         if not day_tasks.empty or not day_events.empty:
-                            task_importance = day_tasks['importance'].values if not day_tasks.empty else []
-                            event_priority = day_events['priority'].values if not day_events.empty else []
+                            task_importance = day_tasks['importance'].values if not day_tasks.empty else None
+                            event_priority = day_events['priority'].values if not day_events.empty else None
                             if 'High' in task_importance or 'Dringend' in event_priority:
                                 button_label = f"**{day}**"
                             elif 'Medium' in task_importance:
                                 button_label = f"*{day}*"
+                            col.markdown(f"<button>{button_label}</button>", unsafe_allow_html=True)
                         if st.button(button_label, key=date_str, help=date_str):
                             st.session_state['current_date'] = date_str
 
@@ -209,4 +185,116 @@ def app():
                 if entry_type == "Task":
                     st.write("**Tasks:**")
                     for index, task in user_tasks.iterrows():
-                        
+                        st.markdown(
+                            f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
+                            unsafe_allow_html=True
+                        )
+                else:
+                    st.write("**Events:**")
+                    for index, event in user_events.iterrows():
+                        st.markdown(
+                            f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                            unsafe_allow_html=True
+                        )
+
+            st.write("**Events:**")
+            if not user_events.empty:
+                for index, event in user_events.iterrows():
+                    st.markdown(
+                        f"<div class='{'urgent-priority' if event['priority'] == 'Dringend' else 'can-wait-priority'}'>{event['description']} - {event['priority']}</div>", 
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.write("No events for this day.")
+
+        if st.button("Logout"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.info("Logged out successfully.")
+
+if __name__ == "__main__":
+    app()
+USERS_FILE = "users.csv"
+TASKS_FILE = "tasks.csv"
+EVENTS_FILE = "events.csv"
+
+# Load data from CSV files if they exist
+def load_data():
+    try:
+        users = pd.read_csv(USERS_FILE)
+    except FileNotFoundError:
+        users = pd.DataFrame(columns=['username', 'password'])
+        
+    try:
+        tasks = pd.read_csv(TASKS_FILE)
+    except FileNotFoundError:
+        tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
+        
+    try:
+        events = pd.read_csv(EVENTS_FILE)
+    except FileNotFoundError:
+        events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
+
+    return users, tasks, events
+
+# Save data to CSV files
+def save_data(users, tasks, events):
+    users.to_csv(USERS_FILE, index=False)
+    tasks.to_csv(TASKS_FILE, index=False)
+    events.to_csv(EVENTS_FILE, index=False)
+
+# Initialization of session state for global DataFrames
+if 'users' not in st.session_state:
+    st.session_state['users'], st.session_state['tasks'], st.session_state['events'] = load_data()
+
+def authenticate(username, password):
+    """Check if the user credentials are valid."""
+    user_data = st.session_state['users'][st.session_state['users']['username'] == username]
+    if not user_data.empty:
+        return user_data.iloc[0]['password'] == password
+    return False
+
+def add_user(username, password):
+    """Add a new user to the DataFrame."""
+    if username not in st.session_state['users']['username'].values:
+        new_user = pd.DataFrame({'username': [username], 'password': [password]})
+        st.session_state['users'] = pd.concat([st.session_state['users'], new_user], ignore_index=True)
+        save_data(st.session_state['users'], st.session_state['tasks'], st.session_state['events'])
+        return True
+    return False
+
+def add_task(username, date, description, importance):
+    """Add a new task to the DataFrame."""
+    new_task = pd.DataFrame({
+        'username': [username], 'date': [date], 'description': [description], 'importance': [importance]
+    })
+    st.session_state['tasks'] = pd.concat([st.session_state['tasks'], new_task], ignore_index=True)
+    save_data(st.session_state['users'], st.session_state['tasks'], st.session_state['events'])
+
+def add_event(username, date, description, priority):
+    """Add a new event to the DataFrame."""
+    new_event = pd.DataFrame({
+        'username': [username], 'date': [date], 'description': [description], 'priority': [priority]
+    })
+    st.session_state['events'] = pd.concat([st.session_state['events'], new_event], ignore_index=True)
+    save_data(st.session_state['users'], st.session_state['tasks'], st.session_state['events'])
+
+def get_tasks_by_date(username, date):
+    """Retrieve tasks for the logged-in user for a specific date."""
+    return st.session_state['tasks'][(st.session_state['tasks']['username'] == username) & (st.session_state['tasks']['date'] == date)]
+
+def get_events_by_date(username, date):
+    """Retrieve events for the logged-in user for a specific date."""
+    return st.session_state['events'][(st.session_state['events']['username'] == username) & (st.session_state['events']['date'] == date)]
+
+def calendar_view(year, month):
+    """Create a calendar view for the given month and year."""
+    cal = calendar.monthcalendar(year, month)
+    return cal
+
+def add_calendar_entry(username, date, entry_type, description, importance=None, priority=None):
+    """Add a calendar entry which can be a task or an event."""
+    if entry_type == 'Task':
+        add_task(username, date, description, importance)
+    elif entry_type == 'Event':
+        add_event(username, date, description, priority)
