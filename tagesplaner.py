@@ -1,4 +1,3 @@
-Registration, anmeldung plus mini kalender
 import streamlit as st
 import sqlite3
 import calendar
