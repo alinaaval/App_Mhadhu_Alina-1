@@ -14,6 +14,11 @@ c.execute('''CREATE TABLE IF NOT EXISTS users
              (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
 conn.commit()
 
+# Tabelle für Aufgaben und Termine erstellen
+c.execute('''CREATE TABLE IF NOT EXISTS tasks
+             (id INTEGER PRIMARY KEY, username TEXT, date TEXT, task TEXT)''')
+conn.commit()
+
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
     c.execute("SELECT * FROM users WHERE username=?", (username,))
@@ -41,6 +46,49 @@ def logout():
 def show_day_view(date):
     st.title("Tagesansicht")
     st.write(f"Anzeigen von Informationen für {date}")
+    
+    st.subheader("Aufgaben")
+    task = st.text_input("Neue Aufgabe")
+    if st.button("Aufgabe hinzufügen"):
+        add_task(st.session_state['username'], date.strftime("%Y-%m-%d"), task)
+        st.success("Aufgabe hinzugefügt!")
+
+    st.subheader("Termine")
+    event = st.text_input("Neuer Termin")
+    if st.button("Termin hinzufügen"):
+        add_event(st.session_state['username'], date.strftime("%Y-%m-%d"), event)
+        st.success("Termin hinzugefügt!")
+
+    tasks = get_tasks(st.session_state['username'], date.strftime("%Y-%m-%d"))
+    events = get_events(st.session_state['username'], date.strftime("%Y-%m-%d"))
+
+    st.subheader("Alle Aufgaben für heute:")
+    for task in tasks:
+        st.write(task)
+
+    st.subheader("Alle Termine für heute:")
+    for event in events:
+        st.write(event)
+
+# Funktion zur Aufgabenhinzufügung
+def add_task(username, date, task):
+    c.execute("INSERT INTO tasks (username, date, task) VALUES (?, ?, ?)", (username, date, task))
+    conn.commit()
+
+# Funktion zur Terminhinzufügung
+def add_event(username, date, event):
+    # Hier können Sie den Code zum Hinzufügen eines Termins in die Datenbank einfügen
+    pass
+
+# Funktion zum Abrufen aller Aufgaben für einen bestimmten Benutzer und ein bestimmtes Datum
+def get_tasks(username, date):
+    c.execute("SELECT task FROM tasks WHERE username=? AND date=?", (username, date))
+    return c.fetchall()
+
+# Funktion zum Abrufen aller Termine für einen bestimmten Benutzer und ein bestimmtes Datum
+def get_events(username, date):
+    # Hier können Sie den Code zum Abrufen aller Termine für einen Benutzer und ein Datum einfügen
+    return []
 
 # Funktion zur Berechnung des nächsten Monats
 def next_month(current_year, current_month):
@@ -89,42 +137,4 @@ def main():
                     st.write("Willkommen zurück,", login_username)
                     st.session_state['authenticated'] = True
                 else:
-                    st.error("Ungültige Anmeldeinformationen!")
-        return
-
-    st.title("Kalender App")
-
-    if st.button("Ausloggen"):
-        logout()
-        return
-
-    # Date selection
-    selected_date = st.date_input("Datum", value=datetime.today())
-
-    if selected_date:
-        year, month, _ = selected_date.year, selected_date.month, selected_date.day
-
-        # Show calendar
-        st.subheader(calendar.month_name[month] + " " + str(year))
-        cal = calendar.monthcalendar(year, month)
-        for week in cal:
-            cols = st.columns(7)
-            for day in week:
-                if day != 0:
-                    date = datetime(year, month, day)
-                    if cols[calendar.weekday(year, month, day)].button(str(day)):
-                        show_day_view(date)
-
-        # Previous and Next Month Buttons
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button("Vorheriger Monat"):
-                year, month = previous_month(year, month)
-                selected_date = datetime(year, month, 1)
-        with col3:
-            if st.button("Nächster Monat"):
-                year, month = next_month(year, month)
-                selected_date = datetime(year, month, 1)
-
-if __name__ == "__main__":
-    main()
+                    st.error("Ungült
