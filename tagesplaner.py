@@ -90,13 +90,8 @@ def app():
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
                 
-                # Öffne den Kalender in einem neuen Fenster
-                st.subheader("Kalender")
-                calendar_container = st.empty()
-                today = datetime.today()
-                year, month = today.year, today.month
-                cal_df = calendar_view(year, month)
-                calendar_container.dataframe(cal_df)
+                # Generiere Link zum Öffnen des Kalenders in einem neuen Fenster
+                st.write("[Öffne Kalender](https://fullcalendar.io/js/fullcalendar-scheduler-5.10.0/demo)", target="_blank")
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
