@@ -134,10 +134,23 @@ def app():
                     st.success("Event added successfully")
             else:
                 st.write("No tasks or events for this day.")
+                
+                with st.form("add_task"):
+                    task_desc = st.text_input("Task Description")
+                    task_importance = st.selectbox("Importance", ["Low", "Medium", "High"])
+                    add_task_btn = st.form_submit_button("Add Task")
+
+                if add_task_btn:
+                    add_task(st.session_state['username'], current_date, task_desc, task_importance)
+                    st.success("Task added successfully")
+
         if st.button("Logout"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.info("Logged out successfully.")
 
 # Note: Uncomment the following line to run this script directly in your local environment.
-app()
+# app()
+
+if __name__ == "__main__":
+    app()
