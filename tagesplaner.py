@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import calendar
-from datetime import datetime
-
 import sqlite3
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
@@ -56,11 +54,6 @@ def main():
             if login(login_username, login_password):
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
-
-                # Einbetten des Fullcalendar-Widgets
-                st.components.html("""
-                    <iframe src="https://fullcalendar.io/js/fullcalendar-scheduler-5.10.0/demo" width="1000" height="600" style="border:none;"></iframe>
-                """)
             else:
                 st.error("Ungültige Anmeldeinformationen!")
 
