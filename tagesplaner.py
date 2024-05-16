@@ -14,9 +14,6 @@ def calendar_view(year, month):
 def main():
     st.title("Kalender App")
 
-    # Eingabefelder für Jahr und Monat
-    year = st.number_input("Jahr", min_value=1900, max_value=2100, value=2024)
-    month = st.selectbox("Monat", range(1, 13))
 
     # Anzeige des Kalenders für das ausgewählte Jahr und Monat
     cal_df = calendar_view(year, month)
