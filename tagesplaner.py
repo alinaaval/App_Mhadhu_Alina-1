@@ -125,5 +125,5 @@ def add_event(username, date, event):
     c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
     conn.commit()
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
