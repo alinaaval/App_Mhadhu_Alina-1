@@ -197,7 +197,7 @@ else:
                             st.session_state['current_date'] = date_str
 
 # Show selected day details
-            if 'current_date' in st.session_state:
+if 'current_date' in st.session_state:
             current_date = st.session_state['current_date']
             st.subheader(f"Details for {current_date}")
             user_tasks = get_tasks_by_date(st.session_state['username'], current_date)
@@ -210,7 +210,7 @@ else:
                         f"<div class='{'low-importance' if task['importance'] == 'Low' else 'medium-importance' if task['importance'] == 'Medium' else 'high-importance'}'>{task['description']} - {task['importance']}</div>", 
                         unsafe_allow_html=True
                     )
-            else:
+else:
                 st.write("No tasks for this day.")
             
             st.write("**Add a new task or event:**")
