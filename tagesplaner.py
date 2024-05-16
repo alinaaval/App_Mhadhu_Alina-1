@@ -8,13 +8,6 @@ users = pd.DataFrame(columns=['username', 'password'])
 tasks = pd.DataFrame(columns=['username', 'date', 'description', 'importance'])
 events = pd.DataFrame(columns=['username', 'date', 'description', 'priority'])
 
-def authenticate(username, password):
-    global users
-    """Check if the user credentials are valid."""
-    user_data = users[users['username'] == username]
-    if not user_data.empty:
-        return user_data.iloc[0]['password'] == password
-    return False
 
 def add_task(username, date, description, importance):
     global tasks
