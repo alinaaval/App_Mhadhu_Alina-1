@@ -1,7 +1,6 @@
 import streamlit as st
-import pandas as pd
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 import sqlite3
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
@@ -42,25 +41,39 @@ def logout():
 
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
-    st.title(f"Termine und Aufgaben für {date}")
+    st.title("Tagesansicht")
+    st.write(f"Anzeigen von Informationen für {date.strftime('%Y-%m-%d')}")
 
-# Funktion zur Berechnung des nächsten Monats
-def next_month(current_year, current_month):
-    next_month_year = current_year
-    next_month = current_month + 1
-    if next_month > 12:
-        next_month = 1
-        next_month_year += 1
-    return next_month_year, next_month
+    username = st.session_state['username']
 
-# Funktion zur Berechnung des vorherigen Monats
-def previous_month(current_year, current_month):
-    previous_month_year = current_year
-    previous_month = current_month - 1
-    if previous_month < 1:
-        previous_month = 12
-        previous_month_year -= 1
-    return previous_month_year, previous_month
+    # Aufgaben und Termine für den ausgewählten Tag abrufen
+    c.execute("SELECT task FROM tasks WHERE username=? AND date=?", (username, date.strftime('%Y-%m-%d')))
+    tasks = c.fetchall()
+    c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date.strftime('%Y-%m-%d')))
+    events = c.fetchall()
+
+    st.subheader("Aufgaben")
+    for task in tasks:
+        st.write(task[0])
+
+    st.subheader("Termine")
+    for event in events:
+        st.write(event[0])
+
+    # Formulare zum Hinzufügen von Aufgaben und Terminen
+    st.subheader("Neue Aufgabe hinzufügen")
+    task = st.text_input("Aufgabe", key="task_input")
+    if st.button("Aufgabe hinzufügen"):
+        add_task(username, date.strftime('%Y-%m-%d'), task)
+        st.success("Aufgabe hinzugefügt!")
+        st.experimental_rerun()  # Seite neu laden, um die neue Aufgabe anzuzeigen
+
+    st.subheader("Neuen Termin hinzufügen")
+    event = st.text_input("Termin", key="event_input")
+    if st.button("Termin hinzufügen"):
+        add_event(username, date.strftime('%Y-%m-%d'), event)
+        st.success("Termin hinzugefügt!")
+        st.experimental_rerun()  # Seite neu laden, um den neuen Termin anzuzeigen
 
 # Funktion zur Aufgabenhinzufügung
 def add_task(username, date, task):
@@ -125,7 +138,7 @@ def main():
             cols = st.columns(7)
             for day in week:
                 if day != 0:
-                    date = date(year, month, day)
+                    date = datetime(year, month, day)
                     if cols[calendar.weekday(year, month, day)].button(str(day)):
                         show_day_view(date)
 
