@@ -1,7 +1,6 @@
 import streamlit as st
-import pandas as pd
-import calendar
 from datetime import datetime, timedelta
+import calendar
 import sqlite3
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
@@ -32,40 +31,8 @@ def login(username, password):
     c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
     return c.fetchone() is not None
 
-# Funktion für die große Kalenderauswahl
-def large_calendar_input(label, min_date=None, max_date=None, key=None):
-    """Custom implementation of a large calendar date input."""
-    selected_date = st.date_input(label, min_value=min_date, max_value=max_date, key=key)
-    return selected_date
-
-# Funktion zur Erstellung eines Monatskalenders
-def calendar_view(year, month):
-    """Create a calendar view for the given month and year."""
-    cal = calendar.monthcalendar(year, month)
-    return cal
-
-# Funktion zur Ermittlung des vorherigen Monats
-def previous_month(current_year, current_month):
-    """Get the previous month."""
-    previous_month_year = current_year
-    previous_month = current_month - 1
-    if previous_month < 1:
-        previous_month = 12
-        previous_month_year -= 1
-    return previous_month_year, previous_month
-
-# Funktion zur Ermittlung des nächsten Monats
-def next_month(current_year, current_month):
-    """Get the next month."""
-    next_month_year = current_year
-    next_month = current_month + 1
-    if next_month > 12:
-        next_month = 1
-        next_month_year += 1
-    return next_month_year, next_month
-
-# Streamlit-Anwendung
-def main():
+# Benutzerregistrierung und -anmeldung
+def authentication():
     st.title("Benutzerregistrierung und -anmeldung")
 
     if st.checkbox("Registrieren"):
@@ -87,13 +54,46 @@ def main():
             if login(login_username, login_password):
                 st.success("Anmeldung erfolgreich!")
                 st.write("Willkommen zurück,", login_username)
-
-                # Kalender App nach erfolgreicher Anmeldung anzeigen
-                app()
+                return True
             else:
                 st.error("Ungültige Anmeldeinformationen!")
+                return False
+    return False
 
-def app():
+# Funktion zur Darstellung des Kalenders
+def large_calendar_input(label, min_date=None, max_date=None, key=None):
+    """Custom implementation of a large calendar date input."""
+    selected_date = st.date_input(label, min_value=min_date, max_value=max_date, key=key)
+    return selected_date
+
+def calendar_view(year, month):
+    """Create a calendar view for the given month and year."""
+    cal = calendar.monthcalendar(year, month)
+    return cal
+
+def previous_month(current_year, current_month):
+    """Get the previous month."""
+    previous_month_year = current_year
+    previous_month = current_month - 1
+    if previous_month < 1:
+        previous_month = 12
+        previous_month_year -= 1
+    return previous_month_year, previous_month
+
+def next_month(current_year, current_month):
+    """Get the next month."""
+    next_month_year = current_year
+    next_month = current_month + 1
+    if next_month > 12:
+        next_month = 1
+        next_month_year += 1
+    return next_month_year, next_month
+
+# Streamlit-Anwendung
+def main():
+    if not authentication():
+        return
+
     st.title("Kalender App")
 
     # Date selection
