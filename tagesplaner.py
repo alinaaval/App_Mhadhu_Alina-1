@@ -135,16 +135,16 @@ def app():
                 with col:
                     if day != 0:
                         date_str = f"{selected_date.year}-{selected_date.month:02}-{day:02}"
-                        button_color = "style='background-color: #FFFFFF;'"
+                        button_color = "background-color: #FFFFFF;"
                         day_tasks = get_tasks_by_date(st.session_state['username'], date_str)
                         if not day_tasks.empty:
                             if 'High' in day_tasks['importance'].values:
-                                button_color = "style='background-color: #FF9999;'"
+                                button_color = "background-color: #FF9999;"
                             elif 'Medium' in day_tasks['importance'].values:
-                                button_color = "style='background-color: #FFFF99;'"
+                                button_color = "background-color: #FFFF99;"
                             elif 'Low' in day_tasks['importance'].values:
-                                button_color = "style='background-color: #D3FFD3;'"
-                        if st.button(f"{day}", key=date_str, help=date_str, unsafe_allow_html=True):
+                                button_color = "background-color: #D3FFD3;"
+                        if st.button(f"{day}", key=date_str, help=date_str):
                             st.session_state['current_date'] = date_str
 
         # Show selected day details
@@ -203,4 +203,3 @@ def app():
                     )
 
 app()
-
