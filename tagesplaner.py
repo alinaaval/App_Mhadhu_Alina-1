@@ -179,7 +179,7 @@ def main():
                             show_day_view(date)
                             st.write("Keine Termine für diesen Tag.")
 
-        # Event hinzufügen
+ # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
         event_description = st.text_input("Terminbeschreibung")
         priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
@@ -190,22 +190,7 @@ def main():
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
-        # Funktion zum Löschen eines Termins
-def delete_event(event_id):
-    try:
-        c.execute("DELETE FROM events WHERE id=?", (event_id,))
-        conn.commit()
-        st.success("Termin erfolgreich gelöscht!")
-    except sqlite3.Error as e:
-        st.error(f"Fehler beim Löschen des Termins: {e}")
-
-# Streamlit-Anwendung
-def main():
-    # ...
-
-    if selected_date:
-        # ...
-
+        # Hier kannst du die Funktion zum Löschen eines Termins einfügen
         for event in events:
             priority = event["priority"]
             event_id = event["id"]
@@ -218,6 +203,7 @@ def main():
                 delete_event(event_id)
 
             event_col.write(event_text)
+
 
 if __name__ == "__main__":
     main()
