@@ -169,4 +169,7 @@ def main():
                 add_event(username, selected_date_str, event_description, priority_value)
                 st.success("Termin hinzugefügt!")
             else:
-                st.error("Bitte eine Terminbeschreibung eingeben
+                st.error("Bitte eine Terminbeschreibung eingeben.")
+
+if __name__ == "__main__":
+    main()
