@@ -29,7 +29,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -97,6 +97,15 @@ def has_events(username, date):
         st.error(f"Fehler beim Überprüfen der Termine: {e}")
         return False
 
+# Funktion zum Löschen eines Termins
+def delete_event(event_id):
+    try:
+        c.execute("DELETE FROM events WHERE id=?", (event_id,))
+        conn.commit()
+        st.success("Termin erfolgreich gelöscht!")
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Löschen des Termins: {e}")
+
 # Streamlit-Anwendung
 def main():
     if 'authenticated' not in st.session_state:
@@ -163,7 +172,7 @@ def main():
                     if events:
                         # Überprüfen, ob eine Veranstaltung mit hoher Priorität vorhanden ist
                         has_high_priority_event = any(event["priority"] == 3 for event in events)
-                        if has_high_priority_event:
+                        if                        has_high_priority_event:
                             button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
                         else:
                             button_text += " 🔵"
@@ -179,7 +188,7 @@ def main():
                             show_day_view(date)
                             st.write("Keine Termine für diesen Tag.")
 
- # Event hinzufügen
+        # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
         event_description = st.text_input("Terminbeschreibung")
         priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
@@ -190,7 +199,8 @@ def main():
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
-        # Hier kannst du die Funktion zum Löschen eines Termins einfügen
+        # Hier fügen wir die Funktion zum Löschen eines Termins hinzu
+        events = show_events(username, selected_date_str)
         for event in events:
             priority = event["priority"]
             event_id = event["id"]
@@ -203,7 +213,6 @@ def main():
                 delete_event(event_id)
 
             event_col.write(event_text)
-
 
 if __name__ == "__main__":
     main()
