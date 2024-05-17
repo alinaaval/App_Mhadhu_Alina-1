@@ -10,11 +10,14 @@ conn = sqlite3.connect('user_data.db')
 c = conn.cursor()
 
 # Tabellen für Benutzer und Kalendereinträge erstellen, falls sie noch nicht existieren
-c.execute('''CREATE TABLE IF NOT EXISTS users
-             (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
-c.execute('''CREATE TABLE IF NOT EXISTS events
-             (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT)''')
-conn.commit()
+def create_tables():
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS events
+                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT)''')
+    conn.commit()
+
+create_tables()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
