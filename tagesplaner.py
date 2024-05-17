@@ -1,3 +1,102 @@
+import streamlit as st
+import pandas as pd
+import calendar
+from datetime import datetime, timedelta
+
+import sqlite3
+
+# Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
+conn = sqlite3.connect('user_data.db')
+c = conn.cursor()
+
+# Tabellen für Benutzer und Kalendereinträge erstellen, falls sie noch nicht existieren
+def create_tables():
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+    
+    # Tabelle events neu erstellen mit Priorität
+    c.execute('''CREATE TABLE IF NOT EXISTS events
+                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER)''')
+    conn.commit()
+
+create_tables()
+
+# Funktion zur Überprüfung, ob ein Benutzer bereits existiert
+def user_exists(username):
+    c.execute("SELECT * FROM users WHERE username=?", (username,))
+    return c.fetchone() is not None
+
+# Funktion zur Registrierung eines neuen Benutzers
+def register(username, password):
+    if not user_exists(username):
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        conn.commit()
+        return True
+    else:
+        return False
+
+# Funktion zur Überprüfung der Anmeldeinformationen
+def login(username, password):
+    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+    return c.fetchone() is not None
+
+# Funktion zum Ausloggen
+def logout():
+    st.session_state['authenticated'] = False
+    if 'username' in st.session_state:
+        del st.session_state['username']
+
+# Funktion zur Anzeige der Tagesansicht
+def show_day_view(date):
+    st.title("Tagesansicht")
+    st.write(f"Anzeigen von Informationen für {date}")
+
+# Funktion zur Berechnung des nächsten Monats
+def next_month(current_year, current_month):
+    next_month_year = current_year
+    next_month = current_month + 1
+    if next_month > 12:
+        next_month = 1
+        next_month_year += 1
+    return next_month_year, next_month
+
+# Funktion zur Berechnung des vorherigen Monats
+def previous_month(current_year, current_month):
+    previous_month_year = current_year
+    previous_month = current_month - 1
+    if previous_month < 1:
+        previous_month = 12
+        previous_month_year -= 1
+    return previous_month_year, previous_month
+
+# Funktion zur Terminhinzufügung mit Priorität
+def add_event(username, date, event, priority):
+    try:
+        c.execute("INSERT INTO events (username, date, event, priority) VALUES (?, ?, ?, ?)", (username, date, event, priority))
+        conn.commit()
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Hinzufügen des Termins: {e}")
+
+# Funktion zur Anzeige von Terminen
+def show_events(username, date):
+    try:
+        c.execute("SELECT event, priority FROM events WHERE username=? AND date=?", (username, date))
+        events = c.fetchall()
+        return [{"event": event[0], "priority": event[1]} for event in events]
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Abrufen der Termine: {e}")
+        return []
+
+# Funktion zur Überprüfung, ob für einen bestimmten Tag Termine existieren
+def has_events(username, date):
+    try:
+        c.execute("SELECT COUNT(*) FROM events WHERE username=? AND date=?", (username, date))
+        count = c.fetchone()[0]
+        return count > 0
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Überprüfen der Termine: {e}")
+        return False
+
 # Streamlit-Anwendung
 def main():
     if 'authenticated' not in st.session_state:
