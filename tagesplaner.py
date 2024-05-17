@@ -88,6 +88,16 @@ def show_events(username, date):
         st.error(f"Fehler beim Abrufen der Termine: {e}")
         return []
 
+# Funktion zur Überprüfung, ob für einen bestimmten Tag Termine existieren
+def has_events(username, date):
+    try:
+        c.execute("SELECT COUNT(*) FROM events WHERE username=? AND date=?", (username, date))
+        count = c.fetchone()[0]
+        return count > 0
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Überprüfen der Termine: {e}")
+        return False
+
 # Streamlit-Anwendung
 def main():
     if 'authenticated' not in st.session_state:
@@ -148,16 +158,19 @@ def main():
             cols = st.columns(7)
             for day in week:
                 if day != 0:
-                    date = datetime(year, month, day)
-                    if cols[calendar.weekday(year, month, day)].button(str(day)):
-                        show_day_view(date)
-                        events = show_events(username, date.strftime("%Y-%m-%d"))
-                        if events:
-                            st.write("Termine:")
-                            for event in events:
-                                st.write(event)
-                        else:
-                            st.write("Keine Termine für diesen Tag.")
+                    date = datetime(year, month, day).strftime("%Y-%m-%d")
+                    if has_events(username, date):
+                        cols[calendar.weekday(year, month, day)].button(f"🔵 {day}")
+                    else:
+                        if cols[calendar.weekday(year, month, day)].button(str(day)):
+                            show_day_view(date)
+                            events = show_events(username, date)
+                            if events:
+                                st.write("Termine:")
+                                for event in events:
+                                    st.write(event)
+                            else:
+                                st.write("Keine Termine für diesen Tag.")
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
