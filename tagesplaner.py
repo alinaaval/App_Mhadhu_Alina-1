@@ -125,8 +125,7 @@ def main():
                     st.error("Benutzername bereits vergeben!")
         else:
             # Benutzeranmeldung
-            st.subheader("Anmeldung
-            st.subheader("Anmeldung")
+                        st.subheader("Anmeldung")
             login_username = st.text_input("Benutzername", key="login_username")
             login_password = st.text_input("Passwort", type="password", key="login_password")
             if st.button("Anmelden", key="login_button"):
