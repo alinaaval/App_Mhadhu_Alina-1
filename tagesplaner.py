@@ -141,6 +141,9 @@ def main():
         year, month, day = selected_date.year, selected_date.month, selected_date.day
         selected_date_str = selected_date.strftime("%Y-%m-%d")
 
+        # Variable, um zu überprüfen, ob die Tagesansicht bereits angezeigt wurde
+        day_view_shown = False
+
         # Show calendar
         st.subheader(calendar.month_name[month] + " " + str(year))
         cal = calendar.monthcalendar(year, month)
@@ -154,7 +157,9 @@ def main():
                     if events:
                         button_text += " 🔵"
                     if cols[calendar.weekday(year, month, day)].button(button_text):
-                        show_day_view(date, username)
+                        if not day_view_shown:
+                            show_day_view(date, username)
+                            day_view_shown = True
                     else:
                         show_day_view(date, username)
 
@@ -162,14 +167,7 @@ def main():
         st.subheader("Neuen Termin hinzufügen")
         event_description = st.text_input("Terminbeschreibung")
         priority = st.radio("Priorität:", ("Niedrig", "Mittel", "Hoch"))
-        if st.button("Hinzufügen"):
-            if event_description:
-                priority_mapping = {"Niedrig": 1, "Mittel": 2, "Hoch": 3}
-                priority_value = priority_mapping[priority]
-                add_event(username, selected_date_str, event_description, priority_value)
-                st.success("Termin hinzugefügt!")
-            else:
-                st.error("Bitte eine Terminbeschreibung eingeben.")
+        if st.button("
 
 if __name__ == "__main__":
     main()
