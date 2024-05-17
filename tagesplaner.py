@@ -29,7 +29,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -77,20 +77,12 @@ def add_event(username, date, event, priority):
     except sqlite3.Error as e:
         st.error(f"Fehler beim Hinzufügen des Termins: {e}")
 
-# Funktion zum Löschen eines Termins
-def delete_event(event_id):
-    try:
-        c.execute("DELETE FROM events WHERE id=?", (event_id,))
-        conn.commit()
-    except sqlite3.Error as e:
-        st.error(f"Fehler beim Löschen des Termins: {e}")
-
 # Funktion zur Anzeige von Terminen
 def show_events(username, date):
     try:
-        c.execute("SELECT id, event, priority FROM events WHERE username=? AND date=?", (username, date))
+        c.execute("SELECT event, priority FROM events WHERE username=? AND date=?", (username, date))
         events = c.fetchall()
-        return [{"id": event[0], "event": event[1], "priority": event[2]} for event in events]
+        return [{"event": event[0], "priority": event[1]} for event in events]
     except sqlite3.Error as e:
         st.error(f"Fehler beim Abrufen der Termine: {e}")
         return []
@@ -125,7 +117,7 @@ def main():
                     st.error("Benutzername bereits vergeben!")
         else:
             # Benutzeranmeldung
-                        st.subheader("Anmeldung")
+            st.subheader("Anmeldung")
             login_username = st.text_input("Benutzername", key="login_username")
             login_password = st.text_input("Passwort", type="password", key="login_password")
             if st.button("Anmelden", key="login_button"):
@@ -177,8 +169,6 @@ def main():
                                 priority = event["priority"]
                                 priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
                                 st.write(f"- {event['event']} (Priorität: {priority_text})")
-                                if st.button("Löschen"):
-                                    delete_event(event['id'])
                     else:
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
