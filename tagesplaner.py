@@ -135,4 +135,41 @@ def main():
         return
 
     # Date selection
-    selected_date = st.date_input("Datum
+    selected_date = st.date_input("Datum", value=datetime.today())
+
+    if selected_date:
+        year, month, day = selected_date.year, selected_date.month, selected_date.day
+        selected_date_str = selected_date.strftime("%Y-%m-%d")
+
+        # Show calendar
+        st.subheader(calendar.month_name[month] + " " + str(year))
+        cal = calendar.monthcalendar(year, month)
+        for week in cal:
+            cols = st.columns(7)
+            for day in week:
+                if day != 0:
+                    date = datetime(year, month, day).strftime("%Y-%m-%d")
+                    events = show_events_for_day(username, date)
+                    button_text = str(day)
+                    if events:
+                        button_text += " 🔵"
+                    if cols[calendar.weekday(year, month, day)].button(button_text):
+                        show_day_view(date, username)
+                    else:
+                        show_day_view(date, username)
+
+        # Event hinzufügen
+        st.subheader("Neuen Termin hinzufügen")
+        event_description = st.text_input("Terminbeschreibung")
+        priority = st.radio("Priorität:", ("Niedrig", "Mittel", "Hoch"))
+        if st.button("Hinzufügen"):
+            if event_description:
+                priority_mapping = {"Niedrig": 1, "Mittel": 2, "Hoch": 3}
+                priority_value = priority_mapping[priority]
+                add_event(username, selected_date_str, event_description, priority_value)
+                st.success("Termin hinzugefügt!")
+            else:
+                st.error("Bitte eine Terminbeschreibung eingeben.")
+
+if __name__ == "__main__":
+    main()
