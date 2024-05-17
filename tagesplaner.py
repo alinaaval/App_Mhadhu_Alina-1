@@ -29,7 +29,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -125,6 +125,7 @@ def main():
                     st.error("Benutzername bereits vergeben!")
         else:
             # Benutzeranmeldung
+            st.subheader("Anmeldung
             st.subheader("Anmeldung")
             login_username = st.text_input("Benutzername", key="login_username")
             login_password = st.text_input("Passwort", type="password", key="login_password")
@@ -175,4 +176,25 @@ def main():
                             st.write("Termine:")
                             for event in events:
                                 priority = event["priority"]
-                                priority_text = "Niedrig" if priority == 1 else "
+                                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                                st.write(f"- {event['event']} (Priorität: {priority_text})")
+                                if st.button("Löschen"):
+                                    delete_event(event['id'])
+                    else:
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                            st.write("Keine Termine für diesen Tag.")
+
+        # Event hinzufügen
+        st.subheader("Neuen Termin hinzufügen")
+        event_description = st.text_input("Terminbeschreibung")
+        priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
+        if st.button("Hinzufügen"):
+            if event_description:
+                add_event(username, selected_date_str, event_description, priority)
+                st.success("Termin hinzugefügt!")
+            else:
+                st.error("Bitte eine Terminbeschreibung eingeben.")
+
+if __name__ == "__main__":
+    main()
