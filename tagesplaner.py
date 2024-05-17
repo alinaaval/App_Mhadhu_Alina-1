@@ -66,14 +66,21 @@ def previous_month(current_year, current_month):
 
 # Funktion zur Terminhinzufügung
 def add_event(username, date, event):
-    c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
-    conn.commit()
+    try:
+        c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
+        conn.commit()
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Hinzufügen des Termins: {e}")
 
 # Funktion zur Anzeige von Terminen
 def show_events(username, date):
-    c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date))
-    events = c.fetchall()
-    return [event[0] for event in events]
+    try:
+        c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date))
+        events = c.fetchall()
+        return [event[0] for event in events]
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Abrufen der Termine: {e}")
+        return []
 
 # Streamlit-Anwendung
 def main():
