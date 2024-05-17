@@ -151,23 +151,22 @@ def main():
         # Show calendar
         st.subheader(calendar.month_name[month] + " " + str(year))
         cal = calendar.monthcalendar(year, month)
-        for week_index in range(6):  # 6 Zeilen für 6 Wochen
+        for week in cal:
             cols = st.columns(7)
-            for day_index in range(7):  # 7 Tage pro Woche
-                day = cal[day_index][week_index] if week_index < len(cal) else 0
+            for day in week:
                 if day != 0:
                     date = datetime(year, month, day).strftime("%Y-%m-%d")
                     events = show_events(username, date)
                     button_text = str(day)
                     if events:
                         button_text += " 🔵"
-                        if cols[day_index].button(button_text):
-                            show_day_view(date)
-                            st.write("Termine:")
-                            for event in events:
-                                priority = event["priority"]
-                                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                                st.write(f"- {event['event']} (Priorität: {priority_text})")
+                    if cols[calendar.weekday(year, month, day)].button(button_text):
+                        show_day_view(date)
+                        st.write("Termine:")
+                        for event in events:
+                            priority = event["priority"]
+                            priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                            st.write(f"- {event['event']} (Priorität: {priority_text})")
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
