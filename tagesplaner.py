@@ -200,19 +200,13 @@ def main():
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
         # Hier kannst du die Funktion zum Löschen eines Termins einfügen
+        st.subheader("Termine löschen")
         for event in events:
-            priority = event["priority"]
             event_id = event["id"]
-            priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-            event_text = f"- {event['event']} (Priorität: {priority_text})"
-            
-            # Hinzufügen einer Schaltfläche zum Löschen des Ereignisses
-            delete_button_col, event_col = st.columns([1, 10])
-            if delete_button_col.button("Löschen", key=f"delete_{event_id}"):
+            event_text = f"{event['event']} am {event['date']} (ID: {event_id})"
+            if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
                 delete_event(event_id)
-
-            event_col.write(event_text)
-
+                st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
 
 if __name__ == "__main__":
     main()
