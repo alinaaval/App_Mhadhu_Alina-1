@@ -108,6 +108,18 @@ def delete_event(event_id):
 
 # Streamlit-Anwendung
 def main():
+    # Hintergrundfarbe ändern
+    st.markdown(
+        """
+        <style>
+        body {
+            background-color: #e6f7ff;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     if 'authenticated' not in st.session_state:
         st.session_state['authenticated'] = False
 
