@@ -9,9 +9,11 @@ import sqlite3
 conn = sqlite3.connect('user_data.db')
 c = conn.cursor()
 
-# Tabelle für Benutzer erstellen, falls sie noch nicht existiert
+# Tabellen für Benutzer und Kalendereinträge erstellen, falls sie noch nicht existieren
 c.execute('''CREATE TABLE IF NOT EXISTS users
              (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+c.execute('''CREATE TABLE IF NOT EXISTS events
+             (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT)''')
 conn.commit()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
@@ -22,7 +24,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -60,6 +62,17 @@ def previous_month(current_year, current_month):
         previous_month_year -= 1
     return previous_month_year, previous_month
 
+# Funktion zur Terminhinzufügung
+def add_event(username, date, event):
+    c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
+    conn.commit()
+
+# Funktion zur Anzeige von Terminen
+def show_events(username, date):
+    c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date))
+    events = c.fetchall()
+    return [event[0] for event in events]
+
 # Streamlit-Anwendung
 def main():
     if 'authenticated' not in st.session_state:
@@ -88,6 +101,7 @@ def main():
                     st.success("Anmeldung erfolgreich!")
                     st.write("Willkommen zurück,", login_username)
                     st.session_state['authenticated'] = True
+                    st.session_state['username'] = login_username
                 else:
                     st.error("Ungültige Anmeldeinformationen!")
         return
@@ -102,7 +116,9 @@ def main():
     selected_date = st.date_input("Datum", value=datetime.today())
 
     if selected_date:
-        year, month, _ = selected_date.year, selected_date.month, selected_date.day
+        year, month, day = selected_date.year, selected_date.month, selected_date.day
+        selected_date_str = selected_date.strftime("%Y-%m-%d")
+        username = st.session_state['username']
 
         # Show calendar
         st.subheader(calendar.month_name[month] + " " + str(year))
@@ -114,16 +130,23 @@ def main():
                     date = datetime(year, month, day)
                     if cols[calendar.weekday(year, month, day)].button(str(day)):
                         show_day_view(date)
+                        events = show_events(username, date.strftime("%Y-%m-%d"))
+                        if events:
+                            st.write("Termine:")
+                            for event in events:
+                                st.write(event)
+                        else:
+                            st.write("Keine Termine für diesen Tag.")
 
-# Funktion zur Aufgabenhinzufügung
-def add_task(username, date, task):
-    c.execute("INSERT INTO tasks (username, date, task) VALUES (?, ?, ?)", (username, date, task))
-    conn.commit()
-
-# Funktion zur Terminhinzufügung
-def add_event(username, date, event):
-    c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
-    conn.commit()
+        # Event hinzufügen
+        st.subheader("Neuen Termin hinzufügen")
+        event_description = st.text_input("Terminbeschreibung")
+        if st.button("Hinzufügen"):
+            if event_description:
+                add_event(username, selected_date_str, event_description)
+                st.success("Termin hinzugefügt!")
+            else:
+                st.error("Bitte eine Terminbeschreibung eingeben.")
 
 if __name__ == "__main__":
     main()
