@@ -1,9 +1,12 @@
 # Streamlit-Anwendung
 def main():
+    print("DEBUG: Starting main function")  # Debugging-Ausgabe hinzufügen
     if 'authenticated' not in st.session_state:
+        print("DEBUG: 'authenticated' not in st.session_state")  # Debugging-Ausgabe hinzufügen
         st.session_state['authenticated'] = False
 
     if not st.session_state['authenticated']:
+        print("DEBUG: User not authenticated")  # Debugging-Ausgabe hinzufügen
         st.title("Benutzerregistrierung und -anmeldung")
 
         if st.checkbox("Registrieren"):
