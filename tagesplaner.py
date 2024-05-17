@@ -107,7 +107,7 @@ def show_events(username, date):
             priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
             event_text = f"- {event['event']} (Priorität: {priority_text})"
             if priority == 3:
-                st.write(event_text, unsafe_allow_html=True, unsafe_allow_html=True, unsafe_allow_html=True, unsafe_allow_html=True)
+                st.write(event_text, unsafe_allow_html=True, style={"color": "red"})
             else:
                 st.write(event_text)
     except sqlite3.Error as e:
