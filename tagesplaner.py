@@ -150,29 +150,27 @@ def main():
         year, month, day = selected_date.year, selected_date.month, selected_date.day
         selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-    # Show calendar
-    st.subheader(calendar.month_name[month] + " " + str(year))
-    cal = calendar.monthcalendar(year, month)
-    for week in cal:
-        cols = st.columns(7)
-        for day in week:
-            if day != 0:
-                date = datetime(year, month, day).strftime("%Y-%m-%d")
-                events = show_events(username, date)
-                button_text = str(day)
-                if events:
-                    button_text += " 🔵"
-                    if cols[calendar.weekday(year, month, day)].button(button_text):
-                        show_day_view(date)  # Hier ändern
-                        st.write("Termine:")
-                        for event in events:
-                            priority = event["priority"]
-                            priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                            st.write(f"- {event['event']} (Priorität: {priority_text})")
-                else:
-                    if cols[calendar.weekday(year, month, day)].button(button_text):
-                        show_day_view(date)  # Hier ändern
-                        st.write("Keine Termine für diesen Tag.")
+   # Show calendar
+        st.subheader(calendar.month_name[month] + " " + str(year))
+        cal = calendar.monthcalendar(year, month)
+        for week in cal:
+            cols = st.columns(7)
+            for day in week:
+                if day != 0:
+                    date = datetime(year, month, day).strftime("%Y-%m-%d")
+                    events = show_events(username, date)
+                    button_text = str(day)
+                    if events:
+                        button_text += " 🔵"
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                            st.write("Termine:")
+                            for event in events:
+                                priority = event["priority"]
+                                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                                st.write(f"- {event['event']} (Priorität: {priority_text})")
+                    else:
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
