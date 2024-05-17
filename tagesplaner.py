@@ -62,6 +62,7 @@ def main():
                     events = show_events(username, date)
                     button_text = str(day)
                     if events:
+                        button_text += " 🔵"
                         priority = max(event["priority"] for event in events)
                         button_color = "red" if priority == 3 else None
                         if cols[calendar.weekday(year, month, day)].button(button_text, key=f"day_button_{date}", help="Termine vorhanden", help_color=button_color):
