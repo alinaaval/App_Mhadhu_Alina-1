@@ -96,22 +96,6 @@ def has_events(username, date):
     except sqlite3.Error as e:
         st.error(f"Fehler beim Überprüfen der Termine: {e}")
         return False
-    
-# Funktion zur Anzeige von Terminen mit entsprechender Prioritätsfarbe
-def show_events(username, date):
-    try:
-        c.execute("SELECT event, priority FROM events WHERE username=? AND date=?", (username, date))
-        events = c.fetchall()
-        for event in events:
-            priority = event["priority"]
-            priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-            event_text = f"- {event['event']} (Priorität: {priority_text})"
-            if priority == 3:
-                st.write(event_text, unsafe_allow_html=True, style={"color": "red"})
-            else:
-                st.write(event_text)
-    except sqlite3.Error as e:
-        st.error(f"Fehler beim Abrufen der Termine: {e}")
 
 # Streamlit-Anwendung
 def main():
