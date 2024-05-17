@@ -176,6 +176,7 @@ def main():
                             button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
                         else:
                             button_text += " 🔵
+                            button_text += " 🔵"
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
                             st.write("Termine:")
