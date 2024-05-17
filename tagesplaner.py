@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import calendar
 from datetime import datetime, timedelta
-
 import sqlite3
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
@@ -102,9 +101,10 @@ def delete_event(event_id):
     try:
         c.execute("DELETE FROM events WHERE id=?", (event_id,))
         conn.commit()
-        st.success("Termin erfolgreich gelöscht!")
+        return True
     except sqlite3.Error as e:
         st.error(f"Fehler beim Löschen des Termins: {e}")
+        return False
 
 # Streamlit-Anwendung
 def main():
@@ -172,10 +172,10 @@ def main():
                     if events:
                         # Überprüfen, ob eine Veranstaltung mit hoher Priorität vorhanden ist
                         has_high_priority_event = any(event["priority"] == 3 for event in events)
-                        if                        has_high_priority_event:
+                        if has_high_priority_event:
                             button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
                         else:
-                            button_text += " 🔵"
+                            button_text += " 🔵
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
                             st.write("Termine:")
@@ -205,8 +205,10 @@ def main():
             event_id = event["id"]
             event_text = f"{event['event']} am {event['date']} (ID: {event_id})"
             if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
-                delete_event(event_id)
-                st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
+                if delete_event(event_id):
+                    st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
+                else:
+                    st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
 
 if __name__ == "__main__":
     main()
