@@ -80,9 +80,9 @@ def add_event(username, date, event, priority):
 # Funktion zur Anzeige von Terminen
 def show_events(username, date):
     try:
-        c.execute("SELECT event, priority FROM events WHERE username=? AND date=?", (username, date))
+        c.execute("SELECT id, event, priority FROM events WHERE username=? AND date=?", (username, date))
         events = c.fetchall()
-        return [{"event": event[0], "priority": event[1]} for event in events]
+        return [{"id": event[0], "event": event[1], "priority": event[2]} for event in events]
     except sqlite3.Error as e:
         st.error(f"Fehler beim Abrufen der Termine: {e}")
         return []
