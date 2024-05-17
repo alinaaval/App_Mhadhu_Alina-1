@@ -24,7 +24,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -38,6 +38,8 @@ def login(username, password):
 # Funktion zum Ausloggen
 def logout():
     st.session_state['authenticated'] = False
+    if 'username' in st.session_state:
+        del st.session_state['username']
 
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
@@ -101,7 +103,7 @@ def main():
                     st.success("Anmeldung erfolgreich!")
                     st.write("Willkommen zurück,", login_username)
                     st.session_state['authenticated'] = True
-                    st.session_state['username'] = login_username
+                    st.session_state['username'] = login_username  # Speichern des Benutzernamens in st.session_state
                 else:
                     st.error("Ungültige Anmeldeinformationen!")
         return
@@ -112,13 +114,19 @@ def main():
         logout()
         return
 
+    # Überprüfen, ob der Benutzername im Session State ist
+    if 'username' in st.session_state:
+        username = st.session_state['username']
+    else:
+        st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
+        return
+
     # Date selection
     selected_date = st.date_input("Datum", value=datetime.today())
 
     if selected_date:
         year, month, day = selected_date.year, selected_date.month, selected_date.day
         selected_date_str = selected_date.strftime("%Y-%m-%d")
-        username = st.session_state['username']
 
         # Show calendar
         st.subheader(calendar.month_name[month] + " " + str(year))
