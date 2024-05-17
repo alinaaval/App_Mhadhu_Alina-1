@@ -19,13 +19,7 @@ def create_tables():
                  (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER)''')
     conn.commit()
 
-# Funktion zum Löschen und Neu-Erstellen der events-Tabelle
-def reset_events_table():
-    c.execute('''DROP TABLE IF EXISTS events''')
-    create_tables()
-
-# Reset der Tabelle aufrufen
-reset_events_table()
+create_tables()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
