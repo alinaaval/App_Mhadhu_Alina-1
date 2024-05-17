@@ -14,8 +14,9 @@ def create_tables():
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
     
+    # Tabelle events neu erstellen mit Priorität
     c.execute('''CREATE TABLE IF NOT EXISTS events
-                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT)''')
+                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER)''')
     conn.commit()
 
 create_tables()
@@ -68,10 +69,10 @@ def previous_month(current_year, current_month):
         previous_month_year -= 1
     return previous_month_year, previous_month
 
-# Funktion zur Terminhinzufügung
-def add_event(username, date, event):
+# Funktion zur Terminhinzufügung mit Priorität
+def add_event(username, date, event, priority):
     try:
-        c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
+        c.execute("INSERT INTO events (username, date, event, priority) VALUES (?, ?, ?, ?)", (username, date, event, priority))
         conn.commit()
     except sqlite3.Error as e:
         st.error(f"Fehler beim Hinzufügen des Termins: {e}")
@@ -79,9 +80,9 @@ def add_event(username, date, event):
 # Funktion zur Anzeige von Terminen
 def show_events(username, date):
     try:
-        c.execute("SELECT event FROM events WHERE username=? AND date=?", (username, date))
+        c.execute("SELECT event, priority FROM events WHERE username=? AND date=?", (username, date))
         events = c.fetchall()
-        return [event[0] for event in events]
+        return [{"event": event[0], "priority": event[1]} for event in events]
     except sqlite3.Error as e:
         st.error(f"Fehler beim Abrufen der Termine: {e}")
         return []
@@ -165,7 +166,9 @@ def main():
                             show_day_view(date)
                             st.write("Termine:")
                             for event in events:
-                                st.write(f"- {event}")
+                                priority = event["priority"]
+                                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                                st.write(f"- {event['event']} (Priorität: {priority_text})")
                     else:
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
@@ -174,9 +177,10 @@ def main():
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
         event_description = st.text_input("Terminbeschreibung")
+        priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
         if st.button("Hinzufügen"):
             if event_description:
-                add_event(username, selected_date_str, event_description)
+                add_event(username, selected_date_str, event_description, priority)
                 st.success("Termin hinzugefügt!")
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
