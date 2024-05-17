@@ -150,7 +150,7 @@ def main():
         year, month, day = selected_date.year, selected_date.month, selected_date.day
         selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-   # Show calendar
+        # Show calendar
         st.subheader(calendar.month_name[month] + " " + str(year))
         cal = calendar.monthcalendar(year, month)
         for week in cal:
@@ -171,6 +171,8 @@ def main():
                                 st.write(f"- {event['event']} (Priorität: {priority_text})")
                     else:
                         if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                            st.write("Keine Termine für diesen Tag.")
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
