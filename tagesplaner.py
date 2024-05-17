@@ -1,10 +1,8 @@
-pip install streamlit-calendar
 import streamlit as st
 import pandas as pd
 import calendar
 from datetime import datetime, timedelta
 import sqlite3
-from streamlit_calendar import calendar as st_calendar
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
 conn = sqlite3.connect('user_data.db')
@@ -15,6 +13,7 @@ def create_tables():
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
     
+    # Tabelle events neu erstellen mit Priorität
     c.execute('''CREATE TABLE IF NOT EXISTS events
                  (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER)''')
     conn.commit()
@@ -29,7 +28,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -160,25 +159,34 @@ def main():
         year, month, day = selected_date.year, selected_date.month, selected_date.day
         selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-        # Show calendar using streamlit-calendar
+        # Show calendar
         st.subheader(calendar.month_name[month] + " " + str(year))
-        selected_date = st_calendar('Auswahl eines Datums', year=year, month=month, selected_date=selected_date_str)
-
-        if selected_date:
-            selected_date_str = selected_date.strftime("%Y-%m-%d")
-            events = show_events(username, selected_date_str)
-            
-            st.write(f"Termine für den {selected_date_str}:")
-            if events:
-                for event in events:
-                    priority = event["priority"]
-                    priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                    st.write(f"- {event['event']} (Priorität: {priority_text})")
-                    if st.button(f"Löschen: {event['event']}", key=f"delete_{event['id']}"):
-                        if delete_event(event['id']):
-                            st.success(f"Termin '{event['event']}' gelöscht.")
+        cal = calendar.monthcalendar(year, month)
+        for week in cal:
+            cols = st.columns(7)
+            for day in week:
+                if day != 0:
+                    date = datetime(year, month, day).strftime("%Y-%m-%d")
+                    events = show_events(username, date)
+                    button_text = str(day)
+                    if events:
+                        # Überprüfen, ob eine Veranstaltung mit hoher Priorität vorhanden ist
+                        has_high_priority_event = any(event["priority"] == 3 for event in events)
+                        if has_high_priority_event:
+                            button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
                         else:
-                            st.error(f"Fehler beim Löschen des Termins '{event['event']}'.")
+                            button_text += " 🔵"
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                            st.write("Termine:")
+                            for event in events:
+                                priority = event["priority"]
+                                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                                st.write(f"- {event['event']} (Priorität: {priority_text})")
+                    else:
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                            st.write("Keine Termine für diesen Tag.")
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
@@ -190,6 +198,23 @@ def main():
                 st.success("Termin hinzugefügt!")
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
+
+        # Events für das ausgewählte Datum abrufen und anzeigen
+        st.subheader("Termine für den ausgewählten Tag")
+        events = show_events(username, selected_date_str)
+        if events:
+            for event in events:
+                event_id = event["id"]
+                event_text = f"{event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
+                if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
+                    if delete_event(event_id):
+                        st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
+                        # Events nach dem Löschen aktualisieren
+                        events = show_events(username, selected_date_str)
+                    else:
+                        st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
+        else:
+            st.write("Keine Termine für diesen Tag.")
 
 if __name__ == "__main__":
     main()
