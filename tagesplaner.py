@@ -199,8 +199,7 @@ def main():
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
-        # Hier fügen wir die Funktion zum Löschen eines Termins hinzu
-        events = show_events(username, selected_date_str)
+        # Hier kannst du die Funktion zum Löschen eines Termins einfügen
         for event in events:
             priority = event["priority"]
             event_id = event["id"]
@@ -213,6 +212,7 @@ def main():
                 delete_event(event_id)
 
             event_col.write(event_text)
+
 
 if __name__ == "__main__":
     main()
