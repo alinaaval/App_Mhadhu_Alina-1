@@ -17,7 +17,15 @@ def create_tables():
                  (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT)''')
     conn.commit()
 
+def check_table_structure():
+    # Überprüfen der Spalten in der Tabelle events
+    c.execute('PRAGMA table_info(events)')
+    columns = [column[1] for column in c.fetchall()]
+    if 'event' not in columns:
+        st.error("Die Spalte 'event' existiert nicht in der Tabelle 'events'. Bitte überprüfen Sie die Tabellenerstellung.")
+
 create_tables()
+check_table_structure()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
