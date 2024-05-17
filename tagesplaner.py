@@ -1,7 +1,9 @@
 import streamlit as st
+import pandas as pd
 import calendar
+from datetime import datetime, timedelta
+
 import sqlite3
-from datetime import datetime
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
 conn = sqlite3.connect('user_data.db')
@@ -27,7 +29,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -160,13 +162,17 @@ def main():
                     button_text = str(day)
                     if events:
                         button_text += " 🔵"
-                    if cols[calendar.weekday(year, month, day)].button(button_text):
-                        show_day_view(date)
-                        st.write("Termine:")
-                        for event in events:
-                            priority = event["priority"]
-                            priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                            st.write(f"- {event['event']} (Priorität: {priority_text})")
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                            st.write("Termine:")
+                            for event in events:
+                                priority = event["priority"]
+                                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                                st.write(f"- {event['event']} (Priorität: {priority_text})")
+                    else:
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                            st.write("Keine Termine für diesen Tag.")
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
