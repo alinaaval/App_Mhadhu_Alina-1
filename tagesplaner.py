@@ -14,9 +14,7 @@ def create_tables():
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
     
-    # Tabelle events neu erstellen
-    c.execute('''DROP TABLE IF EXISTS events''')
-    c.execute('''CREATE TABLE events
+    c.execute('''CREATE TABLE IF NOT EXISTS events
                  (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT)''')
     conn.commit()
 
@@ -30,7 +28,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -159,18 +157,19 @@ def main():
             for day in week:
                 if day != 0:
                     date = datetime(year, month, day).strftime("%Y-%m-%d")
-                    if has_events(username, date):
-                        cols[calendar.weekday(year, month, day)].button(f"🔵 {day}")
-                    else:
-                        if cols[calendar.weekday(year, month, day)].button(str(day)):
+                    events = show_events(username, date)
+                    button_text = str(day)
+                    if events:
+                        button_text += " 🔵"
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
-                            events = show_events(username, date)
-                            if events:
-                                st.write("Termine:")
-                                for event in events:
-                                    st.write(event)
-                            else:
-                                st.write("Keine Termine für diesen Tag.")
+                            st.write("Termine:")
+                            for event in events:
+                                st.write(f"- {event}")
+                    else:
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                            st.write("Keine Termine für diesen Tag.")
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
