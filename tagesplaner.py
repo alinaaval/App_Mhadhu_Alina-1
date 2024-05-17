@@ -108,12 +108,16 @@ def delete_event(event_id):
 
 # Streamlit-Anwendung
 def main():
-    # Hintergrundfarbe ändern
+    # Hintergrundfarbe und Schriftfarbe ändern
     st.markdown(
         """
         <style>
         .stApp {
             background-color: #e6f7ff;
+            color: black;
+        }
+        .stApp * {
+            color: black;
         }
         </style>
         """,
