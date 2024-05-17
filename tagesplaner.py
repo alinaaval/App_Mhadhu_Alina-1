@@ -190,5 +190,34 @@ def main():
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
+        # Funktion zum Löschen eines Termins
+def delete_event(event_id):
+    try:
+        c.execute("DELETE FROM events WHERE id=?", (event_id,))
+        conn.commit()
+        st.success("Termin erfolgreich gelöscht!")
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Löschen des Termins: {e}")
+
+# Streamlit-Anwendung
+def main():
+    # ...
+
+    if selected_date:
+        # ...
+
+        for event in events:
+            priority = event["priority"]
+            event_id = event["id"]
+            priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+            event_text = f"- {event['event']} (Priorität: {priority_text})"
+            
+            # Hinzufügen einer Schaltfläche zum Löschen des Ereignisses
+            delete_button_col, event_col = st.columns([1, 10])
+            if delete_button_col.button("Löschen", key=f"delete_{event_id}"):
+                delete_event(event_id)
+
+            event_col.write(event_text)
+
 if __name__ == "__main__":
     main()
