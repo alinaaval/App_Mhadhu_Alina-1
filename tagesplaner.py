@@ -112,7 +112,7 @@ def main():
     st.markdown(
         """
         <style>
-        body {
+        .stApp {
             background-color: #e6f7ff;
         }
         </style>
