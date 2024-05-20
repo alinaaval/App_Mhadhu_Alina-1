@@ -229,3 +229,6 @@ def main():
         # Alle Termine löschen
         if st.button("Alle Termine löschen"):
             if delete_all_events(username):
+
+if __name__ == "__main__":
+    main()
