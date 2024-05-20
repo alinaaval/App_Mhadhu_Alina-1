@@ -138,18 +138,19 @@ def delete_event(event_id):
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
     current_date = datetime.today().strftime("%Y-%m-%d")
-    st.subheader("Heutige Termine")
-    if 'username' in st.session_state:
-        username = st.session_state['username']
-        events = show_events(username, current_date)
-        if events:
-            st.write("Termine:")
-            for event in events:
-                priority = event["priority"]
-                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                st.write(f"- {event['event']} (Priorität: {priority_text})")
-        else:
-            st.write("Keine Termine für heute.")
+    with st.sidebar:
+        st.subheader("Heutige Termine")
+        if 'username' in st.session_state:
+            username = st.session_state['username']
+            events = show_events(username, current_date)
+            if events:
+                st.write("Termine:")
+                for event in events:
+                    priority = event["priority"]
+                    priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                    st.write(f"- {event['event']} (Priorität: {priority_text})")
+            else:
+                st.write("Keine Termine für heute.")
 
 # Streamlit-Anwendung
 def main():
