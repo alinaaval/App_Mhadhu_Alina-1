@@ -28,7 +28,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -104,16 +104,6 @@ def delete_event(event_id):
         return True
     except sqlite3.Error as e:
         st.error(f"Fehler beim Löschen des Termins: {e}")
-        return False
-
-# Funktion zum Löschen aller Termine eines Benutzers
-def delete_all_events(username):
-    try:
-        c.execute("DELETE FROM events WHERE username=?", (username,))
-        conn.commit()
-        return True
-    except sqlite3.Error as e:
-        st.error(f"Fehler beim Löschen aller Termine: {e}")
         return False
 
 # Streamlit-Anwendung
@@ -225,10 +215,6 @@ def main():
                         st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
         else:
             st.write("Keine Termine für diesen Tag.")
-
-        # Alle Termine löschen
-        if st.button("Alle Termine löschen"):
-            if delete_all_events(username):
 
 if __name__ == "__main__":
     main()
