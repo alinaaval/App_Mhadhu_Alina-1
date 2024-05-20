@@ -54,7 +54,7 @@ def logout():
     if 'username' in st.session_state:
         del st.session_state['username']
         
-# Funktion zur Anzeige der Tagesansicht
+# Funktion zur Anzeige der Tagesansicht mit Zeitangaben für Termine
 def show_day_view(date):
     st.title("Tagesansicht")
     st.write(f"Anzeigen von Informationen für {date}")
@@ -65,9 +65,10 @@ def show_day_view(date):
         if events:
             st.write("Termine:")
             for event in events:
+                event_time = event.get("time", "Keine Zeitangabe")  # Falls keine Zeitangabe vorhanden ist
                 priority = event["priority"]
                 priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                st.write(f"- {event['event']} (Priorität: {priority_text})")
+                st.write(f"- {event['event']} (Zeit: {event_time}, Priorität: {priority_text})")
         else:
             st.write("Keine Termine für diesen Tag.")
             
