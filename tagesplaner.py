@@ -136,11 +136,6 @@ def delete_event(event_id):
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
     current_date = datetime.today().strftime("%Y-%m-%d")
-    european_timezone = pytz.timezone('Europe/Berlin')
-    current_time_european = datetime.now(european_timezone).strftime("%H:%M")
-    st.sidebar.subheader("Europäische Zeit")
-    st.sidebar.write(current_time_european)
-
     with st.sidebar:
         st.subheader("Heutige Termine")
         if 'username' in st.session_state:
