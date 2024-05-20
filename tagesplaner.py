@@ -28,7 +28,7 @@ def user_exists(username):
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         return True
     else:
@@ -199,16 +199,22 @@ def main():
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
-        # Hier kannst du die Funktion zum Löschen eines Termins einfügen
-        st.subheader("Termine löschen")
-        for event in events:
-            event_id = event["id"]
-            event_text = f"{event['event']} am {event['date']} (ID: {event_id})"
-            if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
-                if delete_event(event_id):
-                    st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
-                else:
-                    st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
+        # Events für das ausgewählte Datum abrufen und anzeigen
+        st.subheader("Termine für den ausgewählten Tag")
+        events = show_events(username, selected_date_str)
+        if events:
+            for event in events:
+                event_id = event["id"]
+                event_text = f"{event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
+                if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
+                    if delete_event(event_id):
+                        st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
+                        # Events nach dem Löschen aktualisieren
+                        events = show_events(username, selected_date_str)
+                    else:
+                        st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
+        else:
+            st.write("Keine Termine für diesen Tag.")
 
 if __name__ == "__main__":
     main()
