@@ -33,7 +33,7 @@ def user_exists(username):
 def register(username, password):
     if not user_exists(username):
         conn, c = get_db_connection()
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         conn.close()
         return True
@@ -53,41 +53,23 @@ def logout():
     st.session_state['authenticated'] = False
     if 'username' in st.session_state:
         del st.session_state['username']
-        
-# Funktion zur Anzeige der Tagesansicht
-def show_day_view(date):
-    st.title("Tagesansicht")
-    st.write(f"Anzeigen von Informationen für {date}")
-    # Events für das angegebene Datum anzeigen
-    if 'username' in st.session_state:
-        username = st.session_state['username']
-        events = show_events(username, date)
-        if events:
-            st.write("Termine:")
-            for event in events:
-                priority = event["priority"]
-                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                st.write(f"- {event['event']} (Priorität: {priority_text})")
-        else:
-            st.write("Keine Termine für diesen Tag.")
-            
-# Funktion zur Berechnung des nächsten Monats
-def next_month(current_year, current_month):
-    next_month_year = current_year
-    next_month = current_month + 1
-    if next_month > 12:
-        next_month = 1
-        next_month_year += 1
-    return next_month_year, next_month
 
-# Funktion zur Berechnung des vorherigen Monats
-def previous_month(current_year, current_month):
-    previous_month_year = current_year
-    previous_month = current_month - 1
-    if previous_month < 1:
-        previous_month = 12
-        previous_month_year -= 1
-    return previous_month_year, previous_month
+# Funktion zur Anzeige der aktuellen Tagesansicht
+def show_current_day_view():
+    current_date = datetime.today().strftime("%Y-%m-%d")
+    with st.sidebar:
+        st.subheader("Heutige Termine")
+        if 'username' in st.session_state:
+            username = st.session_state['username']
+            events = show_events(username, current_date)
+            if events:
+                st.write("Termine:")
+                for event in events:
+                    priority = event["priority"]
+                    priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                    st.write(f"- {event['event']} (Priorität: {priority_text})")
+            else:
+                st.write("Keine Termine für heute.")
 
 # Funktion zur Terminhinzufügung mit Priorität
 def add_event(username, date, event, priority):
@@ -111,18 +93,6 @@ def show_events(username, date):
         st.error(f"Fehler beim Abrufen der Termine: {e}")
         return []
 
-# Funktion zur Überprüfung, ob für einen bestimmten Tag Termine existieren
-def has_events(username, date):
-    try:
-        conn, c = get_db_connection()
-        c.execute("SELECT COUNT(*) FROM events WHERE username=? AND date=?", (username, date))
-        count = c.fetchone()[0]
-        conn.close()
-        return count > 0
-    except sqlite3.Error as e:
-        st.error(f"Fehler beim Überprüfen der Termine: {e}")
-        return False
-
 # Funktion zum Löschen eines Termins
 def delete_event(event_id):
     try:
@@ -134,23 +104,6 @@ def delete_event(event_id):
     except sqlite3.Error as e:
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
-
-# Funktion zur Anzeige der aktuellen Tagesansicht
-def show_current_day_view():
-    current_date = datetime.today().strftime("%Y-%m-%d")
-    with st.sidebar:
-        st.subheader("Heutige Termine")
-        if 'username' in st.session_state:
-            username = st.session_state['username']
-            events = show_events(username, current_date)
-            if events:
-                st.write("Termine:")
-                for event in events:
-                    priority = event["priority"]
-                    priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                    st.write(f"- {event['event']} (Priorität: {priority_text})")
-            else:
-                st.write("Keine Termine für heute.")
 
 # Streamlit-Anwendung
 def main():
