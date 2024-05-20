@@ -4,40 +4,49 @@ import calendar
 from datetime import datetime, timedelta
 import sqlite3
 
-# Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
-conn = sqlite3.connect('user_data.db')
-c = conn.cursor()
+# Funktion zur Verbindung mit der SQLite-Datenbank
+def get_db_connection():
+    conn = sqlite3.connect('user_data.db')
+    return conn, conn.cursor()
 
 # Tabellen für Benutzer und Kalendereinträge erstellen, falls sie noch nicht existieren
 def create_tables():
+    conn, c = get_db_connection()
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
-    
-    # Tabelle events neu erstellen mit Priorität
     c.execute('''CREATE TABLE IF NOT EXISTS events
                  (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER)''')
     conn.commit()
+    conn.close()
 
 create_tables()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
+    conn, c = get_db_connection()
     c.execute("SELECT * FROM users WHERE username=?", (username,))
-    return c.fetchone() is not None
+    result = c.fetchone()
+    conn.close()
+    return result is not None
 
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        conn, c = get_db_connection()
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
+        conn.close()
         return True
     else:
         return False
 
 # Funktion zur Überprüfung der Anmeldeinformationen
 def login(username, password):
+    conn, c = get_db_connection()
     c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-    return c.fetchone() is not None
+    result = c.fetchone()
+    conn.close()
+    return result is not None
 
 # Funktion zum Ausloggen
 def logout():
@@ -71,16 +80,20 @@ def previous_month(current_year, current_month):
 # Funktion zur Terminhinzufügung mit Priorität
 def add_event(username, date, event, priority):
     try:
+        conn, c = get_db_connection()
         c.execute("INSERT INTO events (username, date, event, priority) VALUES (?, ?, ?, ?)", (username, date, event, priority))
         conn.commit()
+        conn.close()
     except sqlite3.Error as e:
         st.error(f"Fehler beim Hinzufügen des Termins: {e}")
 
 # Funktion zur Anzeige von Terminen
 def show_events(username, date):
     try:
+        conn, c = get_db_connection()
         c.execute("SELECT id, event, priority FROM events WHERE username=? AND date=?", (username, date))
         events = c.fetchall()
+        conn.close()
         return [{"id": event[0], "event": event[1], "priority": event[2]} for event in events]
     except sqlite3.Error as e:
         st.error(f"Fehler beim Abrufen der Termine: {e}")
@@ -89,8 +102,10 @@ def show_events(username, date):
 # Funktion zur Überprüfung, ob für einen bestimmten Tag Termine existieren
 def has_events(username, date):
     try:
+        conn, c = get_db_connection()
         c.execute("SELECT COUNT(*) FROM events WHERE username=? AND date=?", (username, date))
         count = c.fetchone()[0]
+        conn.close()
         return count > 0
     except sqlite3.Error as e:
         st.error(f"Fehler beim Überprüfen der Termine: {e}")
@@ -99,8 +114,10 @@ def has_events(username, date):
 # Funktion zum Löschen eines Termins
 def delete_event(event_id):
     try:
+        conn, c = get_db_connection()
         c.execute("DELETE FROM events WHERE id=?", (event_id,))
         conn.commit()
+        conn.close()
         return True
     except sqlite3.Error as e:
         st.error(f"Fehler beim Löschen des Termins: {e}")
