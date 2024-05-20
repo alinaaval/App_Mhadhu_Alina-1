@@ -178,6 +178,7 @@ def main():
         username = st.session_state['username']
     else:
         st.error("Fehler: Ben
+                 
 # Streamlit-Anwendung
 def main():
     if 'authenticated' not in st.session_state:
