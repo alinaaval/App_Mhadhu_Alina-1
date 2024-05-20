@@ -56,8 +56,6 @@ def logout():
         
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
-    st.title("Tagesansicht")
-    st.write(f"Anzeigen von Informationen für {date}")
     # Events für das angegebene Datum anzeigen
     if 'username' in st.session_state:
         username = st.session_state['username']
