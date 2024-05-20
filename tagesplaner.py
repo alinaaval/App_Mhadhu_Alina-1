@@ -136,8 +136,7 @@ def delete_event(event_id):
         return False
 
 # Funktion zur Anzeige der aktuellen Tagesansicht
-def show_current_day_view
-():
+def show_current_day_view():
     current_date = datetime.today().strftime("%Y-%m-%d")
     st.subheader("Heutige Termine")
     if 'username' in st.session_state:
