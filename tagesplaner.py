@@ -225,8 +225,6 @@ def main():
                         st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
         else:
             st.write("Keine Termine für diesen Tag.")
-
-        # Alle
-
-if __name__ == "__main__":
-    main()
+        
+        # Alle Termine löschen
+        if st.button
