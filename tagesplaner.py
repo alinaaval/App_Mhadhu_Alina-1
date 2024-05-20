@@ -77,7 +77,7 @@ def previous_month(current_year, current_month):
         previous_month_year -= 1
     return previous_month_year, previous_month
 
-# Funktion zur Terminhinzufügung mit Priorität
+# Funktion zur Terminhinzufügung mit Priorität und Zeit
 def add_event(username, date, time, event, priority):
     try:
         conn, c = get_db_connection()
@@ -209,7 +209,7 @@ def main():
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
         event_description = st.text_input("Terminbeschreibung")
-        event_time = st.time_input("Uhrzeit")
+        event_time = st.time_input("Zeit")
         priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
         if st.button("Hinzufügen"):
             if event_description:
@@ -219,13 +219,12 @@ def main():
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
         # Events für das ausgewählte Datum abrufen und anzeigen
-        st.subheader("Termine für den ausgewählten Tag")
+                st.subheader("Termine für den ausgewählten Tag")
         events = show_events(username, selected_date_str)
         if events:
             for event in events:
                 event_id = event["id"]
-                event_time = event["time"]
-                event_text = f"{event_time} - {event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
+                event_text = f"{event['time']} - {event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
                 if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
                     if delete_event(event_id):
                         st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
