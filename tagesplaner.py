@@ -1,7 +1,6 @@
 import streamlit as st
-import pandas as pd
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 import sqlite3
 
 # Funktion zur Verbindung mit der SQLite-Datenbank
@@ -33,7 +32,7 @@ def user_exists(username):
 def register(username, password):
     if not user_exists(username):
         conn, c = get_db_connection()
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         conn.close()
         return True
@@ -54,22 +53,22 @@ def logout():
     if 'username' in st.session_state:
         del st.session_state['username']
 
-# Funktion zur Anzeige der Tagesansicht
-def show_day_view(date):
-    st.title("Tagesansicht")
-    st.write(f"Anzeigen von Informationen für {date}")
-    # Events für das angegebene Datum anzeigen
-    if 'username' in st.session_state:
-        username = st.session_state['username']
-        events = show_events(username, date)
-        if events:
-            st.write("Termine:")
-            for event in events:
-                priority = event["priority"]
-                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                st.write(f"- {event['event']} (Priorität: {priority_text})")
-        else:
-            st.write("Keine Termine für diesen Tag.")
+# Funktion zur Anzeige der aktuellen Tagesansicht
+def show_current_day_view():
+    current_date = datetime.today().strftime("%Y-%m-%d")
+    with st.sidebar:
+        st.subheader("Heutige Termine")
+        if 'username' in st.session_state:
+            username = st.session_state['username']
+            events = show_events(username, current_date)
+            if events:
+                st.write("Termine:")
+                for event in events:
+                    priority = event["priority"]
+                    priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                    st.write(f"- {event['event']} (Priorität: {priority_text})")
+            else:
+                st.write("Keine Termine für heute.")
 
 # Funktion zur Berechnung des nächsten Monats
 def next_month(current_year, current_month):
@@ -135,23 +134,50 @@ def delete_event(event_id):
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
 
-# Funktion zur Anzeige der aktuellen Tagesansicht
-def show_current_day_view():
-    current_date = datetime.today().strftime("%Y-%m-%d")
-    with st.sidebar:
-        st.subheader("Heutige Termine")
-        if 'username' in st.session_state:
-            username = st.session_state['username']
-            events = show_events(username, current_date)
-            if events:
-                st.write("Termine:")
-                for event in events:
-                    priority = event["priority"]
-                    priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                    st.write(f"- {event['event']} (Priorität: {priority_text})")
-            else:
-                st.write("Keine Termine für heute.")
+# Streamlit-Anwendung
+def main():
+    if 'authenticated' not in st.session_state:
+        st.session_state['authenticated'] = False
 
+    if not st.session_state['authenticated']:
+        st.title("Benutzerregistrierung und -anmeldung")
+
+        if st.checkbox("Registrieren"):
+            # Benutzerregistrierung
+            st.subheader("Registrierung")
+            new_username = st.text_input("Benutzername")
+            new_password = st.text_input("Passwort", type="password")
+            if st.button("Registrieren"):
+                if register(new_username, new_password):
+                    st.success("Registrierung erfolgreich!")
+                else:
+                    st.error("Benutzername bereits vergeben!")
+        else:
+            # Benutzeranmeldung
+            st.subheader("Anmeldung")
+            login_username = st.text_input("Benutzername", key="login_username")
+            login_password = st.text_input("Passwort", type="password", key="login_password")
+            if st.button("Anmelden", key="login_button"):
+                if login(login_username, login_password):
+                    st.success("Anmeldung erfolgreich!")
+                    st.write("Willkommen zurück,", login_username)
+                    st.session_state['authenticated'] = True
+                    st.session_state['username'] = login_username  # Speichern des Benutzernamens in st.session_state
+                else:
+                    st.error("Ungültige Anmeldeinformationen!")
+        return
+
+    st.title("Kalender App")
+
+    if st.button("Ausloggen"):
+        logout()
+        return
+
+    # Überprüfen, ob der Benutzername im Session State ist
+    if 'username' in st.session_state:
+        username = st.session_state['username']
+    else:
+        st.error("Fehler: Ben
 # Streamlit-Anwendung
 def main():
     if 'authenticated' not in st.session_state:
@@ -198,17 +224,17 @@ def main():
         st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
         return
 
-    # Aktuelle Tagesansicht anzeigen
+    # Anzeige der aktuellen Tagesansicht
     show_current_day_view()
 
-    # Date selection
+    # Datumauswahl
     selected_date = st.date_input("Datum", value=datetime.today())
 
     if selected_date:
         year, month, day = selected_date.year, selected_date.month, selected_date.day
         selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-        # Show calendar
+        # Kalender anzeigen
         st.subheader(calendar.month_name[month] + " " + str(year))
         cal = calendar.monthcalendar(year, month)
         for week in cal:
@@ -226,12 +252,14 @@ def main():
                         else:
                             button_text += " 🔵"
                         if cols[calendar.weekday(year, month, day)].button(button_text):
-                            show_day_view(date)
+                            # Hier können Sie die Aktionen hinzufügen, die Sie bei Klick auf einen Tag ausführen möchten
+                            pass
                     else:
                         if cols[calendar.weekday(year, month, day)].button(button_text):
-                            show_day_view(date)
+                            # Hier können Sie die Aktionen hinzufügen, die Sie bei Klick auf einen Tag ausführen möchten
+                            pass
 
-        # Event hinzufügen
+        # Termin hinzufügen
         st.subheader("Neuen Termin hinzufügen")
         event_description = st.text_input("Terminbeschreibung")
         priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
