@@ -54,7 +54,7 @@ def logout():
     if 'username' in st.session_state:
         del st.session_state['username']
         
-# Funktion zur Anzeige der Tagesansicht mit Zeitangaben für Termine
+# Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
     st.title("Tagesansicht")
     st.write(f"Anzeigen von Informationen für {date}")
@@ -65,10 +65,9 @@ def show_day_view(date):
         if events:
             st.write("Termine:")
             for event in events:
-                event_time = event.get("time", "Keine Zeitangabe")  # Falls keine Zeitangabe vorhanden ist
                 priority = event["priority"]
                 priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                st.write(f"- {event['event']} (Zeit: {event_time}, Priorität: {priority_text})")
+                st.write(f"- {event['event']} (Priorität: {priority_text})")
         else:
             st.write("Keine Termine für diesen Tag.")
             
@@ -90,27 +89,15 @@ def previous_month(current_year, current_month):
         previous_month_year -= 1
     return previous_month_year, previous_month
 
-# Funktion zur Terminhinzufügung mit Priorität und Zeit
-def add_event(username, date, time, event, priority):
+# Funktion zur Terminhinzufügung mit Priorität
+def add_event(username, date, event, priority):
     try:
         conn, c = get_db_connection()
-        c.execute("INSERT INTO events (username, date, time, event, priority) VALUES (?, ?, ?, ?, ?)", (username, date, time, event, priority))
+        c.execute("INSERT INTO events (username, date, event, priority) VALUES (?, ?, ?, ?)", (username, date, event, priority))
         conn.commit()
         conn.close()
     except sqlite3.Error as e:
         st.error(f"Fehler beim Hinzufügen des Termins: {e}")
-
-# Event hinzufügen
-st.subheader("Neuen Termin hinzufügen")
-event_description = st.text_input("Terminbeschreibung")
-event_time = st.time_input("Zeit")
-priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
-if st.button("Hinzufügen"):
-    if event_description:
-        add_event(username, selected_date_str, event_time.strftime("%H:%M"), event_description, priority)
-        st.success("Termin hinzugefügt!")
-    else:
-        st.error("Bitte eine Terminbeschreibung eingeben.")
 
 # Funktion zur Anzeige von Terminen
 def show_events(username, date):
