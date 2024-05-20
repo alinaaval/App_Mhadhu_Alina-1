@@ -54,23 +54,6 @@ def logout():
     if 'username' in st.session_state:
         del st.session_state['username']
 
-# Funktion zur Anzeige der Tagesansicht
-def show_day_view(date):
-    st.title("Tagesansicht")
-    st.write(f"Anzeigen von Informationen für {date}")
-    # Events für das angegebene Datum anzeigen
-    if 'username' in st.session_state:
-        username = st.session_state['username']
-        events = show_events(username, date)
-        if events:
-            st.write("Termine:")
-            for event in events:
-                priority = event["priority"]
-                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                st.write(f"- {event['event']} (Priorität: {priority_text})")
-        else:
-            st.write("Keine Termine für diesen Tag.")
-
 # Funktion zur Berechnung des nächsten Monats
 def next_month(current_year, current_month):
     next_month_year = current_year
