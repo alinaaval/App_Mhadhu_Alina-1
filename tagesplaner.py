@@ -33,7 +33,7 @@ def user_exists(username):
 def register(username, password):
     if not user_exists(username):
         conn, c = get_db_connection()
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
         conn.commit()
         conn.close()
         return True
@@ -58,6 +58,18 @@ def logout():
 def show_day_view(date):
     st.title("Tagesansicht")
     st.write(f"Anzeigen von Informationen für {date}")
+    # Events für das angegebene Datum anzeigen
+    if 'username' in st.session_state:
+        username = st.session_state['username']
+        events = show_events(username, date)
+        if events:
+            st.write("Termine:")
+            for event in events:
+                priority = event["priority"]
+                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                st.write(f"- {event['event']} (Priorität: {priority_text})")
+        else:
+            st.write("Keine Termine für diesen Tag.")
 
 # Funktion zur Berechnung des nächsten Monats
 def next_month(current_year, current_month):
@@ -123,6 +135,12 @@ def delete_event(event_id):
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
 
+# Funktion zur Anzeige der aktuellen Tagesansicht
+def show_current_day_view():
+    current_date = datetime.today().strftime("%Y-%m-%d")
+    st.subheader("Heutige Termine")
+    show_day_view(current_date)
+
 # Streamlit-Anwendung
 def main():
     if 'authenticated' not in st.session_state:
@@ -169,6 +187,9 @@ def main():
         st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
         return
 
+    # Aktuelle Tagesansicht anzeigen
+    show_current_day_view()
+
     # Date selection
     selected_date = st.date_input("Datum", value=datetime.today())
 
@@ -195,15 +216,9 @@ def main():
                             button_text += " 🔵"
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
-                            st.write("Termine:")
-                            for event in events:
-                                priority = event["priority"]
-                                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                                st.write(f"- {event['event']} (Priorität: {priority_text})")
                     else:
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
-                            st.write("Keine Termine für diesen Tag.")
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
