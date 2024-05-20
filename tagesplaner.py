@@ -139,7 +139,16 @@ def delete_event(event_id):
 def show_current_day_view():
     current_date = datetime.today().strftime("%Y-%m-%d")
     st.subheader("Heutige Termine")
-    show_day_view(current_date)
+    if 'username' in st.session_state:
+        username = st.session_state['username']
+        events = show_events(username, current_date)
+        if events:
+            for event in events:
+                priority = event["priority"]
+                priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
+                st.write(f"- {event['event']} (Priorität: {priority_text})")
+        else:
+            st.write("Keine Termine für heute.")
 
 # Streamlit-Anwendung
 def main():
@@ -187,66 +196,72 @@ def main():
         st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
         return
 
-    # Aktuelle Tagesansicht anzeigen
-    show_current_day_view()
+    # Layout in zwei Spalten teilen
+    col1, col2 = st.columns([3, 1])
 
-    # Date selection
-    selected_date = st.date_input("Datum", value=datetime.today())
+    with col1:
+        # Kalender und Datumsauswahl
+        selected_date = st.date_input("Datum", value=datetime.today())
 
-    if selected_date:
-        year, month, day = selected_date.year, selected_date.month, selected_date.day
-        selected_date_str = selected_date.strftime("%Y-%m-%d")
+        if selected_date:
+            year, month, day = selected_date.year, selected_date.month, selected_date.day
+            selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-        # Show calendar
-        st.subheader(calendar.month_name[month] + " " + str(year))
-        cal = calendar.monthcalendar(year, month)
-        for week in cal:
-            cols = st.columns(7)
-            for day in week:
-                if day != 0:
-                    date = datetime(year, month, day).strftime("%Y-%m-%d")
-                    events = show_events(username, date)
-                    button_text = str(day)
-                    if events:
-                        # Überprüfen, ob eine Veranstaltung mit hoher Priorität vorhanden ist
-                        has_high_priority_event = any(event["priority"] == 3 for event in events)
-                        if has_high_priority_event:
-                            button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
+            # Show calendar
+            st.subheader(calendar.month_name[month] + " " + str(year))
+            cal = calendar.monthcalendar(year, month)
+            for week in cal:
+                cols = st.columns(7)
+                for day in week:
+                    if day != 0:
+                        date = datetime(year, month, day).strftime("%Y-%m-%d")
+                        events = show_events(username, date)
+                        button_text = str(day)
+                        if events:
+                            # Überprüfen, ob eine Veranstaltung mit hoher Priorität vorhanden ist
+                            has_high_priority_event = any(event["priority"] == 3 for event in events)
+                            if has_high_priority_event:
+                                button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
+                            else:
+                                button_text += " 🔵"
+                            if cols[calendar.weekday(year, month, day)].button(button_text):
+                                show_day_view(date)
                         else:
-                            button_text += " 🔵"
-                        if cols[calendar.weekday(year, month, day)].button(button_text):
-                            show_day_view(date)
-                    else:
-                        if cols[calendar.weekday(year, month, day)].button(button_text):
-                            show_day_view(date)
+                            if cols[calendar.weekday(year, month, day)].button(button_text):
+                                show_day_view(date)
 
-        # Event hinzufügen
-        st.subheader("Neuen Termin hinzufügen")
-        event_description = st.text_input("Terminbeschreibung")
-        priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
-        if st.button("Hinzufügen"):
-            if event_description:
-                add_event(username, selected_date_str, event_description, priority)
-                st.success("Termin hinzugefügt!")
+            # Event hinzufügen
+            st.subheader("Neuen Termin hinzufügen")
+            event_description = st.text_input("Terminbeschreibung")
+            priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
+            if st.button("Hinzufügen"):
+                if event_description:
+                    add_event(username, selected_date_str, event_description, priority)
+                    st.success("Termin hinzugefügt!")
+                else:
+                    st.error("Bitte eine Terminbeschreibung eingeben.")
+
+            # Events für das ausgewählte Datum abrufen und anzeigen
+            st.subheader("Termine für den ausgewählten Tag")
+            events = show_events(username, selected_date_str)
+            if events:
+                for event in events:
+                    event_id = event["id"]
+                    event_text = f"{event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
+                    if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
+                        if delete_event(event_id):
+                            st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
+                            # Events nach dem Löschen aktualisieren
+                            events = show_events(username, selected_date_str)
+                        else:
+                            st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
             else:
-                st.error("Bitte eine Terminbeschreibung eingeben.")
+                st.write("Keine Termine für diesen Tag.")
 
-        # Events für das ausgewählte Datum abrufen und anzeigen
-        st.subheader("Termine für den ausgewählten Tag")
-        events = show_events(username, selected_date_str)
-        if events:
-            for event in events:
-                event_id = event["id"]
-                event_text = f"{event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
-                if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
-                    if delete_event(event_id):
-                        st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
-                        # Events nach dem Löschen aktualisieren
-                        events = show_events(username, selected_date_str)
-                    else:
-                        st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
-        else:
-            st.write("Keine Termine für diesen Tag.")
+    with col2:
+        # Heutige Termine anzeigen
+        st.subheader("Heutige Termine")
+        show_current_day_view()
 
 if __name__ == "__main__":
     main()
