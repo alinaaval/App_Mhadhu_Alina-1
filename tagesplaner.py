@@ -12,92 +12,52 @@ def get_db_connection():
 # Tabellen für Benutzer und Kalendereinträge erstellen, falls sie noch nicht existieren
 def create_tables():
     conn, c = get_db_connection()
-    try:
-        c.execute('''CREATE TABLE IF NOT EXISTS users
-                     (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
-        c.execute('''CREATE TABLE IF NOT EXISTS events
-                     (id INTEGER PRIMARY KEY, username TEXT, date TEXT, time TEXT, event TEXT, priority INTEGER)''')
-        conn.commit()
-    except sqlite3.Error as e:
-        st.error(f"Fehler beim Erstellen der Tabellen: {e}")
-    finally:
-        conn.close()
-
-# Funktion zur Löschung der events-Tabelle
-def delete_events_table():
-    conn, c = get_db_connection()
-    c.execute("DROP TABLE IF EXISTS events")
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS events
+                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER)''')
     conn.commit()
     conn.close()
 
-# Funktion zur Änderung der events-Tabelle (Hinzufügen der Spalte time)
-def add_time_column():
-    conn, c = get_db_connection()
-    try:
-        c.execute("ALTER TABLE events ADD COLUMN time TEXT")
-        conn.commit()
-    except sqlite3.Error as e:
-        st.error(f"Fehler beim Hinzufügen der Spalte: {e}")
-    finally:
-        conn.close()
-
-# Tabellen löschen und neu erstellen (nutzen Sie dies nur, wenn Sie keine bestehenden Daten haben oder diese nicht benötigen)
-# delete_events_table()
-
-# Tabellen erstellen oder Spalte hinzufügen
 create_tables()
-# add_time_column()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
     conn, c = get_db_connection()
-    try:
-        c.execute("SELECT * FROM users WHERE username=?", (username,))
-        result = c.fetchone()
-        return result is not None
-    except sqlite3.Error as e:
-        st.error(f"Fehler bei der Überprüfung des Benutzers: {e}")
-        return False
-    finally:
-        conn.close()
+    c.execute("SELECT * FROM users WHERE username=?", (username,))
+    result = c.fetchone()
+    conn.close()
+    return result is not None
 
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
         conn, c = get_db_connection()
-        try:
-            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
-            conn.commit()
-            return True
-        except sqlite3.Error as e:
-            st.error(f"Fehler bei der Registrierung: {e}")
-            return False
-        finally:
-            conn.close()
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        conn.commit()
+        conn.close()
+        return True
     else:
         return False
 
 # Funktion zur Überprüfung der Anmeldeinformationen
 def login(username, password):
     conn, c = get_db_connection()
-    try:
-        c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-        result = c.fetchone()
-        return result is not None
-    except sqlite3.Error as e:
-        st.error(f"Fehler bei der Anmeldung: {e}")
-        return False
-    finally:
-        conn.close()
+    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+    result = c.fetchone()
+    conn.close()
+    return result is not None
 
 # Funktion zum Ausloggen
 def logout():
     st.session_state['authenticated'] = False
     if 'username' in st.session_state:
         del st.session_state['username']
-
+        
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
+    st.write(f"Anzeigen von Informationen für {date}")
+    
     # Events für das angegebene Datum anzeigen
     if 'username' in st.session_state:
         username = st.session_state['username']
@@ -107,10 +67,10 @@ def show_day_view(date):
             for event in events:
                 priority = event["priority"]
                 priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                st.write(f"- {event['event']} um {event['time']} (Priorität: {priority_text})")
+                st.write(f"- {event['event']} (Priorität: {priority_text})")
         else:
             st.write("Keine Termine für diesen Tag.")
-
+            
 # Funktion zur Berechnung des nächsten Monats
 def next_month(current_year, current_month):
     next_month_year = current_year
@@ -130,28 +90,26 @@ def previous_month(current_year, current_month):
     return previous_month_year, previous_month
 
 # Funktion zur Terminhinzufügung mit Priorität
-def add_event(username, date, time, event, priority):
+def add_event(username, date, event, priority):
     try:
         conn, c = get_db_connection()
-        c.execute("INSERT INTO events (username, date, time, event, priority) VALUES (?, ?, ?, ?, ?)", (username, date, time, event, priority))
+        c.execute("INSERT INTO events (username, date, event, priority) VALUES (?, ?, ?, ?)", (username, date, event, priority))
         conn.commit()
+        conn.close()
     except sqlite3.Error as e:
         st.error(f"Fehler beim Hinzufügen des Termins: {e}")
-    finally:
-        conn.close()
 
 # Funktion zur Anzeige von Terminen
 def show_events(username, date):
     try:
         conn, c = get_db_connection()
-        c.execute("SELECT id, time, event, priority FROM events WHERE username=? AND date=?", (username, date))
+        c.execute("SELECT id, event, priority FROM events WHERE username=? AND date=?", (username, date))
         events = c.fetchall()
-        return [{"id": event[0], "time": event[1], "event": event[2], "priority": event[3]} for event in events]
+        conn.close()
+        return [{"id": event[0], "event": event[1], "priority": event[2]} for event in events]
     except sqlite3.Error as e:
         st.error(f"Fehler beim Abrufen der Termine: {e}")
         return []
-    finally:
-        conn.close()
 
 # Funktion zur Überprüfung, ob für einen bestimmten Tag Termine existieren
 def has_events(username, date):
@@ -159,12 +117,11 @@ def has_events(username, date):
         conn, c = get_db_connection()
         c.execute("SELECT COUNT(*) FROM events WHERE username=? AND date=?", (username, date))
         count = c.fetchone()[0]
+        conn.close()
         return count > 0
     except sqlite3.Error as e:
         st.error(f"Fehler beim Überprüfen der Termine: {e}")
         return False
-    finally:
-        conn.close()
 
 # Funktion zum Löschen eines Termins
 def delete_event(event_id):
@@ -172,12 +129,11 @@ def delete_event(event_id):
         conn, c = get_db_connection()
         c.execute("DELETE FROM events WHERE id=?", (event_id,))
         conn.commit()
+        conn.close()
         return True
     except sqlite3.Error as e:
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
-    finally:
-        conn.close()
 
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
@@ -192,7 +148,7 @@ def show_current_day_view():
                 for event in events:
                     priority = event["priority"]
                     priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                    st.write(f"- {event['event']} um {event['time']} (Priorität: {priority_text})")
+                    st.write(f"- {event['event']} (Priorität: {priority_text})")
             else:
                 st.write("Keine Termine für heute.")
 
@@ -278,11 +234,10 @@ def main():
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
         event_description = st.text_input("Terminbeschreibung")
-        event_time = st.time_input("Uhrzeit", value=datetime.now().time())
         priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
         if st.button("Hinzufügen"):
             if event_description:
-                add_event(username, selected_date_str, event_time.strftime("%H:%M"), event_description, priority)
+                add_event(username, selected_date_str, event_description, priority)
                 st.success("Termin hinzugefügt!")
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
@@ -293,7 +248,7 @@ def main():
         if events:
             for event in events:
                 event_id = event["id"]
-                event_text = f"{event['event']} um {event['time']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
+                event_text = f"{event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
                 if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
                     if delete_event(event_id):
                         st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
