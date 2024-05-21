@@ -23,7 +23,30 @@ def create_tables():
     finally:
         conn.close()
 
+# Funktion zur Löschung der events-Tabelle
+def delete_events_table():
+    conn, c = get_db_connection()
+    c.execute("DROP TABLE IF EXISTS events")
+    conn.commit()
+    conn.close()
+
+# Funktion zur Änderung der events-Tabelle (Hinzufügen der Spalte time)
+def add_time_column():
+    conn, c = get_db_connection()
+    try:
+        c.execute("ALTER TABLE events ADD COLUMN time TEXT")
+        conn.commit()
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Hinzufügen der Spalte: {e}")
+    finally:
+        conn.close()
+
+# Tabellen löschen und neu erstellen (nutzen Sie dies nur, wenn Sie keine bestehenden Daten haben oder diese nicht benötigen)
+# delete_events_table()
+
+# Tabellen erstellen oder Spalte hinzufügen
 create_tables()
+# add_time_column()
 
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
