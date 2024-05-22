@@ -197,6 +197,9 @@ def main():
     else:
         st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
         return
+    
+    # Beispiel für das Hinzufügen eines Bildes aus einer URL
+    st.image("https://www.pinterest.de/pin/796152040359820516/", caption="Bild aus einer URL")
 
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
