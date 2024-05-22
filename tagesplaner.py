@@ -139,6 +139,20 @@ def delete_event(event_id):
 def main():
     st.title("Kalender App mit Timer")
 
+    if 'authenticated' not in st.session_state:
+        st.session_state['authenticated'] = False
+
+    if not st.session_state['authenticated']:
+        st.title("Benutzerregistrierung und -anmeldung")
+        # Code für Registrierung und Anmeldung hier ...
+
+    # Willkommensmeldung anzeigen
+    if 'username' in st.session_state:
+        username = st.session_state['username']
+        st.write(f"Willkommen zurück, {username}")
+    else:
+        st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
+
     # Timer-Funktion
     def run_timer(duration):
         st.write("Timer läuft...")
