@@ -21,32 +21,30 @@ def create_tables():
 
 create_tables()
 
+
+# Tabelle für Benutzer erstellen, falls sie noch nicht existiert
+c.execute('''CREATE TABLE IF NOT EXISTS users
+             (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+conn.commit()
+
 # Funktion zur Überprüfung, ob ein Benutzer bereits existiert
 def user_exists(username):
-    conn, c = get_db_connection()
     c.execute("SELECT * FROM users WHERE username=?", (username,))
-    result = c.fetchone()
-    conn.close()
-    return result is not None
+    return c.fetchone() is not None
 
 # Funktion zur Registrierung eines neuen Benutzers
 def register(username, password):
     if not user_exists(username):
-        conn, c = get_db_connection()
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
-        conn.close()
         return True
     else:
         return False
 
 # Funktion zur Überprüfung der Anmeldeinformationen
 def login(username, password):
-    conn, c = get_db_connection()
     c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-    result = c.fetchone()
-    conn.close()
-    return result is not None
+    return c.fetchone() is not None
 
 # Funktion zum Ausloggen
 def logout():
