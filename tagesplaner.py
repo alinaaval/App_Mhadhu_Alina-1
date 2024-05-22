@@ -185,7 +185,7 @@ def main():
                     st.error("Ungültige Anmeldeinformationen!")
         return
 
-    st.title("Kalender App")
+    st.title("To-do Liste")
 
     if st.button("Ausloggen"):
         logout()
