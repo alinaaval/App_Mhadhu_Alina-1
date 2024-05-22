@@ -284,7 +284,7 @@ def main():
         """
         <style>
         body {
-            background-color: #ffc0cb;
+            background-color: #F2CEE3;
         }
         </style>
         """,
