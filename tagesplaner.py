@@ -218,18 +218,6 @@ def main():
             unsafe_allow_html=True
         )
 
-        # Ändere die Hintergrundfarbe der gesamten App
-    st.markdown(
-        """
-        <style>
-        body {
-            background-color: #ffc0cb;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
 
@@ -291,5 +279,17 @@ def main():
         else:
             st.write("Keine Termine für diesen Tag.")
 
+      # Ändere die Hintergrundfarbe der gesamten App
+    st.markdown(
+        """
+        <style>
+        body {
+            background-color: #ffc0cb;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
 if __name__ == "__main__":
     main()
