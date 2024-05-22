@@ -202,7 +202,22 @@ def main():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col3:
         st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png")
-
+    
+    # Füge der linken Spalte eine hellrosa Hintergrundfarbe hinzu
+    with col1:
+        st.markdown(
+            """
+            <style>
+            [data-testid="stVerticalBlock"] > div:first-child {
+                background-color: #ffe6e6;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
 
@@ -263,18 +278,6 @@ def main():
                         st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
         else:
             st.write("Keine Termine für diesen Tag.")
-
-    # Ändere die Hintergrundfarbe
-    st.markdown(
-        """
-        <style>
-        body {
-            background-color: #f0f2f6;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
 if __name__ == "__main__":
     main()
