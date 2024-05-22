@@ -135,7 +135,6 @@ def delete_event(event_id):
     except sqlite3.Error as e:
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
-
 def main():
     st.title("Kalender App mit Timer")
 
@@ -153,19 +152,29 @@ def main():
     else:
         st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
 
+    # Spaltenlayout für Timer, Bild und andere Inhalte
+    timer_column, image_column, main_column = st.columns([1, 1, 2])
+
     # Timer-Funktion
     def run_timer(duration):
-        st.write("Timer läuft...")
-        with st.spinner("Timer läuft..."):
-            time.sleep(duration)
-        st.success("Timer abgelaufen!")
+        with timer_column:
+            st.write("Timer läuft...")
+            with st.spinner("Timer läuft..."):
+                time.sleep(duration)
+            st.success("Timer abgelaufen!")
 
     # Timer-Eingabe
-    duration = st.number_input("Dauer des Timers (in Sekunden):", min_value=0, step=1, format="%d")
+    with timer_column:
+        duration = st.number_input("Dauer des Timers (in Sekunden):", min_value=0, step=1, format="%d")
+
+    # Bild einfügen
+    with image_column:
+        st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png", caption="Bild aus einer URL", use_column_width=True)
 
     # Timer starten
-    if st.button("Timer starten"):
-        run_timer(duration)
+    with main_column:
+        if st.button("Timer starten"):
+            run_timer(duration)
         
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
