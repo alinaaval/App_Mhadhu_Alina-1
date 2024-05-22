@@ -137,15 +137,21 @@ def delete_event(event_id):
         return False
 
 def main():
-    st.title("Timer App")
+    st.title("Kalender App mit Timer")
 
-    duration = st.number_input("Dauer des Timers (in Sekunden):", min_value=0, step=1, format="%d")
-
-    if st.button("Start"):
+    # Timer-Funktion
+    def run_timer(duration):
         st.write("Timer läuft...")
         with st.spinner("Timer läuft..."):
             time.sleep(duration)
         st.success("Timer abgelaufen!")
+
+    # Timer-Eingabe
+    duration = st.number_input("Dauer des Timers (in Sekunden):", min_value=0, step=1, format="%d")
+
+    # Timer starten
+    if st.button("Timer starten"):
+        run_timer(duration)
         
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
