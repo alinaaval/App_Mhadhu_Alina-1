@@ -3,6 +3,7 @@ import pandas as pd
 import calendar
 from datetime import datetime
 import sqlite3
+import time
 
 # Funktion zur Verbindung mit der SQLite-Datenbank
 def get_db_connection():
@@ -135,6 +136,17 @@ def delete_event(event_id):
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
 
+def main():
+    st.title("Timer App")
+
+    duration = st.number_input("Dauer des Timers (in Sekunden):", min_value=0, step=1, format="%d")
+
+    if st.button("Start"):
+        st.write("Timer läuft...")
+        with st.spinner("Timer läuft..."):
+            time.sleep(duration)
+        st.success("Timer abgelaufen!")
+        
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
     current_date = datetime.today().strftime("%Y-%m-%d")
