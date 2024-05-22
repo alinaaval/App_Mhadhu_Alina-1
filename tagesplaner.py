@@ -89,11 +89,11 @@ def previous_month(current_year, current_month):
         previous_month_year -= 1
     return previous_month_year, previous_month
 
-# Funktion zur Terminhinzufügung mit Priorität
-def add_event(username, date, event, priority):
+# Funktion zur Terminhinzufügung mit Priorität und Uhrzeit
+def add_event(username, date, time, event, priority):
     try:
         conn, c = get_db_connection()
-        c.execute("INSERT INTO events (username, date, event, priority) VALUES (?, ?, ?, ?)", (username, date, event, priority))
+        c.execute("INSERT INTO events (username, date, time, event, priority) VALUES (?, ?, ?, ?, ?)", (username, date, time, event, priority))
         conn.commit()
         conn.close()
     except sqlite3.Error as e:
