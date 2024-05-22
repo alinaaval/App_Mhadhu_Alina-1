@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 import sqlite3
 
 # Funktion zur Verbindung mit der SQLite-Datenbank
@@ -199,7 +199,7 @@ def main():
         return
     
     # Beispiel für das Hinzufügen eines Bildes aus einer URL
-    st.image("https://www.pinterest.de/pin/796152040359820516/", caption="Bild aus einer URL")
+    st.image("https://via.placeholder.com/150", caption="Bild aus einer URL")  # Dies ist eine Beispiel-URL, die funktioniert
 
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
@@ -261,18 +261,6 @@ def main():
                         st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
         else:
             st.write("Keine Termine für diesen Tag.")
-
-# Ändere die Hintergrundfarbe auf Pastelrosa
-st.markdown(
-    """
-    <style>
-    .reportview-container {
-        background: #f5dcd6; /* Pastelrosa */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 if __name__ == "__main__":
     main()
