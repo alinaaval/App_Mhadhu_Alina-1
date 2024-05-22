@@ -15,7 +15,7 @@ def create_tables():
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS events
-                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER, completed BOOLEAN DEFAULT 0)''')
+                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER)''')
     conn.commit()
     conn.close()
 
@@ -53,7 +53,7 @@ def logout():
     st.session_state['authenticated'] = False
     if 'username' in st.session_state:
         del st.session_state['username']
-
+        
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
     st.write(f"Anzeigen von Informationen für {date}")
@@ -103,10 +103,10 @@ def add_event(username, date, event, priority):
 def show_events(username, date):
     try:
         conn, c = get_db_connection()
-        c.execute("SELECT id, event, priority, completed FROM events WHERE username=? AND date=?", (username, date))
+        c.execute("SELECT id, event, priority FROM events WHERE username=? AND date=?", (username, date))
         events = c.fetchall()
         conn.close()
-        return [{"id": event[0], "event": event[1], "priority": event[2], "completed": event[3]} for event in events]
+        return [{"id": event[0], "event": event[1], "priority": event[2]} for event in events]
     except sqlite3.Error as e:
         st.error(f"Fehler beim Abrufen der Termine: {e}")
         return []
@@ -135,16 +135,6 @@ def delete_event(event_id):
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
 
-# Funktion zur Aktualisierung des Status eines Termins
-def update_event_status(event_id, completed):
-    try:
-        conn, c = get_db_connection()
-        c.execute("UPDATE events SET completed=? WHERE id=?", (completed, event_id))
-        conn.commit()
-        conn.close()
-    except sqlite3.Error as e:
-        st.error(f"Fehler beim Aktualisieren des Terminstatus: {e}")
-
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
     current_date = datetime.today().strftime("%Y-%m-%d")
@@ -158,10 +148,7 @@ def show_current_day_view():
                 for event in events:
                     priority = event["priority"]
                     priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                    if st.checkbox(f"{event['event']} (Priorität: {priority_text})", value=event["completed"], key=f"event_{event['id']}"):
-                        update_event_status(event['id'], True)
-                    else:
-                        update_event_status(event['id'], False)
+                    st.write(f"- {event['event']} (Priorität: {priority_text})")
             else:
                 st.write("Keine Termine für heute.")
 
@@ -179,6 +166,13 @@ def main():
             # Bild hinzufügen
             st.image("https://i0.wp.com/www.additudemag.com/wp-content/uploads/2018/03/For-Parents_DTPC-Motivation_bored-boy-at-desk_ts-866103068-cropped.jpeg", caption="Motivation", use_column_width=True)
             
+            # Checkliste hinzufügen
+            st.subheader("Motivations-Checkliste")
+            st.checkbox("Aufstehen")
+            st.checkbox("Frühstücken")
+            st.checkbox("Tagesplanung")
+            st.checkbox("Erstes To-Do erledigen")
+
         with col2:
             if st.checkbox("Registrieren"):
                 # Benutzerregistrierung
@@ -250,34 +244,6 @@ def main():
                     else:
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
-
-        # Event hinzufügen
-        st.subheader("Neuen Termin hinzufügen")
-        event_description = st.text_input("Terminbeschreibung")
-        priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
-        if st.button("Hinzufügen"):
-            if event_description:
-                add_event(username, selected_date_str, event_description, priority)
-                st.success("Termin hinzugefügt!")
-            else:
-                st.error("Bitte eine Terminbeschreibung eingeben.")
-
-        # Events für das ausgewählte Datum abrufen und anzeigen
-        st.subheader("Termine für den ausgewählten Tag")
-        events = show_events(username, selected_date_str)
-        if events:
-            for event in events:
-                event_id = event["id"]
-                event_text = f"{event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
-                if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
-                    if delete_event(event_id):
-                        st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
-                        # Events nach dem Löschen aktualisieren
-                        events = show_events(username, selected_date_str)
-                    else:
-                        st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
-        else:
-            st.write("Keine Termine für diesen Tag.")
 
 if __name__ == "__main__":
     main()
