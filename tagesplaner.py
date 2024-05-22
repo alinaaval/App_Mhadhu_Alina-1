@@ -154,6 +154,18 @@ def show_current_day_view():
 
 # Streamlit-Anwendung
 def main():
+    # Ändere die Hintergrundfarbe auf Pastelrosa
+    st.markdown(
+        """
+        <style>
+        .reportview-container {
+            background: #f5dcd6; /* Pastelrosa */
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     if 'authenticated' not in st.session_state:
         st.session_state['authenticated'] = False
 
@@ -197,9 +209,6 @@ def main():
     else:
         st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
         return
-    
-    # Beispiel für das Hinzufügen eines Bildes aus einer URL
-    st.image("https://via.placeholder.com/150", caption="Bild aus einer URL")  # Dies ist eine Beispiel-URL, die funktioniert
 
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
