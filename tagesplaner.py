@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 import sqlite3
-import time
 
 # Funktion zur Verbindung mit der SQLite-Datenbank
 def get_db_connection():
@@ -16,7 +15,7 @@ def create_tables():
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS events
-                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER)''')
+                 (id INTEGER PRIMARY KEY, username TEXT, date TEXT, event TEXT, priority INTEGER, completed BOOLEAN DEFAULT 0)''')
     conn.commit()
     conn.close()
 
@@ -54,7 +53,7 @@ def logout():
     st.session_state['authenticated'] = False
     if 'username' in st.session_state:
         del st.session_state['username']
-        
+
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
     st.write(f"Anzeigen von Informationen für {date}")
@@ -104,10 +103,10 @@ def add_event(username, date, event, priority):
 def show_events(username, date):
     try:
         conn, c = get_db_connection()
-        c.execute("SELECT id, event, priority FROM events WHERE username=? AND date=?", (username, date))
+        c.execute("SELECT id, event, priority, completed FROM events WHERE username=? AND date=?", (username, date))
         events = c.fetchall()
         conn.close()
-        return [{"id": event[0], "event": event[1], "priority": event[2]} for event in events]
+        return [{"id": event[0], "event": event[1], "priority": event[2], "completed": event[3]} for event in events]
     except sqlite3.Error as e:
         st.error(f"Fehler beim Abrufen der Termine: {e}")
         return []
@@ -135,16 +134,17 @@ def delete_event(event_id):
     except sqlite3.Error as e:
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
-def main():
-    st.title("Kalender App mit Timer")
 
-    if 'authenticated' not in st.session_state:
-        st.session_state['authenticated'] = False
+# Funktion zur Aktualisierung des Status eines Termins
+def update_event_status(event_id, completed):
+    try:
+        conn, c = get_db_connection()
+        c.execute("UPDATE events SET completed=? WHERE id=?", (completed, event_id))
+        conn.commit()
+        conn.close()
+    except sqlite3.Error as e:
+        st.error(f"Fehler beim Aktualisieren des Terminstatus: {e}")
 
-    if not st.session_state['authenticated']:
-        st.title("Benutzerregistrierung und -anmeldung")
-        # Code für Registrierung und Anmeldung hier ...
-        
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
     current_date = datetime.today().strftime("%Y-%m-%d")
@@ -158,7 +158,10 @@ def show_current_day_view():
                 for event in events:
                     priority = event["priority"]
                     priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                    st.write(f"- {event['event']} (Priorität: {priority_text})")
+                    if st.checkbox(f"{event['event']} (Priorität: {priority_text})", value=event["completed"], key=f"event_{event['id']}"):
+                        update_event_status(event['id'], True)
+                    else:
+                        update_event_status(event['id'], False)
             else:
                 st.write("Keine Termine für heute.")
 
@@ -169,36 +172,40 @@ def main():
 
     if not st.session_state['authenticated']:
         st.title("Benutzerregistrierung und -anmeldung")
-    
-# Bild hinzufügen
-        st.image("https://i0.wp.com/www.additudemag.com/wp-content/uploads/2018/03/For-Parents_DTPC-Motivation_bored-boy-at-desk_ts-866103068-cropped.jpeg")
 
-        if st.checkbox("Registrieren"):
-            # Benutzerregistrierung
-            st.subheader("Registrierung")
-            new_username = st.text_input("Benutzername")
-            new_password = st.text_input("Passwort", type="password")
-            if st.button("Registrieren"):
-                if register(new_username, new_password):
-                    st.success("Registrierung erfolgreich!")
-                else:
-                    st.error("Benutzername bereits vergeben!")
-        else:
-            # Benutzeranmeldung
-            st.subheader("Anmeldung")
-            login_username = st.text_input("Benutzername", key="login_username")
-            login_password = st.text_input("Passwort", type="password", key="login_password")
-            if st.button("Anmelden", key="login_button"):
-                if login(login_username, login_password):
-                    st.success("Anmeldung erfolgreich!")
-                    st.write("Willkommen zurück,", login_username)
-                    st.session_state['authenticated'] = True
-                    st.session_state['username'] = login_username  # Speichern des Benutzernamens in st.session_state
-                else:
-                    st.error("Ungültige Anmeldeinformationen!")
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            # Bild hinzufügen
+            st.image("https://i0.wp.com/www.additudemag.com/wp-content/uploads/2018/03/For-Parents_DTPC-Motivation_bored-boy-at-desk_ts-866103068-cropped.jpeg", caption="Motivation", use_column_width=True)
+            
+        with col2:
+            if st.checkbox("Registrieren"):
+                # Benutzerregistrierung
+                st.subheader("Registrierung")
+                new_username = st.text_input("Benutzername")
+                new_password = st.text_input("Passwort", type="password")
+                if st.button("Registrieren"):
+                    if register(new_username, new_password):
+                        st.success("Registrierung erfolgreich!")
+                    else:
+                        st.error("Benutzername bereits vergeben!")
+            else:
+                # Benutzeranmeldung
+                st.subheader("Anmeldung")
+                login_username = st.text_input("Benutzername", key="login_username")
+                login_password = st.text_input("Passwort", type="password", key="login_password")
+                if st.button("Anmelden", key="login_button"):
+                    if login(login_username, login_password):
+                        st.success("Anmeldung erfolgreich!")
+                        st.write("Willkommen zurück,", login_username)
+                        st.session_state['authenticated'] = True
+                        st.session_state['username'] = login_username  # Speichern des Benutzernamens in st.session_state
+                    else:
+                        st.error("Ungültige Anmeldeinformationen!")
         return
 
-    st.title("To-do Liste")
+    st.title("Kalender App")
 
     if st.button("Ausloggen"):
         logout()
@@ -210,31 +217,6 @@ def main():
     else:
         st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
         return
-    
-    # Platzieren des Bildes oben rechts
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col3:
-        st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png")
-
-        # Platzieren des Bildes oben rechts
-    col1, col2, col3 = st.columns([2, 2, 2])
-    with col3:
-        st.image("https://i0.wp.com/www.additudemag.com/wp-content/uploads/2018/03/For-Parents_DTPC-Motivation_bored-boy-at-desk_ts-866103068-cropped.jpeg")
-    
-   # Füge der linken Spalte eine hellrosa Hintergrundfarbe hinzu
-    with col1:
-        st.markdown(
-            """
-            <style>
-            [data-testid="stVerticalBlock"] > div:first-child {
-                background-color: #CAC9E1;
-                padding: 10px;
-                border-radius: 5px;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
 
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
@@ -280,7 +262,7 @@ def main():
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
-        # Events für den ausgewählten Tag abrufen und anzeigen
+        # Events für das ausgewählte Datum abrufen und anzeigen
         st.subheader("Termine für den ausgewählten Tag")
         events = show_events(username, selected_date_str)
         if events:
@@ -296,6 +278,6 @@ def main():
                         st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
         else:
             st.write("Keine Termine für diesen Tag.")
-    
+
 if __name__ == "__main__":
     main()
