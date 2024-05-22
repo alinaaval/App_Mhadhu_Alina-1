@@ -231,4 +231,35 @@ def main():
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
 
+        # Event hinzufügen
+        st.subheader("Neuen Termin hinzufügen")
+        event_description = st.text_input("Terminbeschreibung")
+        priority = st.selectbox("Priorität", [1, 2, 3], format_func=lambda x: "Niedrig" if x == 1 else "Mittel" if x == 2 else "Hoch")
+        if st.button("Hinzufügen"):
+            if event_description:
+                add_event(username, selected_date_str, event_description, priority)
+                st.success("Termin hinzugefügt!")
+            else:
+                st.error("Bitte eine Terminbeschreibung eingeben.")
+
+        # Events für das ausgewählte Datum abrufen und anzeigen
+        st.subheader("Termine für den ausgewählten Tag")
+        events = show_events(username, selected_date_str)
+        if events:
+            for event in events:
+                event_id = event["id"]
+                event_text = f"{event['event']} (Priorität: {'Niedrig' if event['priority'] == 1 else 'Mittel' if event['priority'] == 2 else 'Hoch'})"
+                if st.button(f"Löschen: {event_text}", key=f"delete_{event_id}"):
+                    if delete_event(event_id):
+                        st.success(f"Termin mit ID {event_id} erfolgreich gelöscht.")
+                        # Events nach dem Löschen aktualisieren
+                        events = show_events(username, selected_date_str)
+                    else:
+                        st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
+        else:
+            st.write("Keine Termine für diesen Tag.")
+
+if __name__ == "__main__":
+    main()
+
        
