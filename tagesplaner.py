@@ -144,37 +144,6 @@ def main():
     if not st.session_state['authenticated']:
         st.title("Benutzerregistrierung und -anmeldung")
         # Code für Registrierung und Anmeldung hier ...
-
-    # Willkommensmeldung anzeigen
-    if 'username' in st.session_state:
-        username = st.session_state['username']
-        st.write(f"Willkommen zurück, {username}")
-    else:
-        st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
-
-    # Spaltenlayout für Timer, Bild und andere Inhalte
-    timer_column, image_column, main_column = st.columns([1, 1, 2])
-
-    # Timer-Funktion
-    def run_timer(duration):
-        with timer_column:
-            st.write("Timer läuft...")
-            with st.spinner("Timer läuft..."):
-                time.sleep(duration)
-            st.success("Timer abgelaufen!")
-
-    # Timer-Eingabe
-    with timer_column:
-        duration = st.number_input("Dauer des Timers (in Sekunden):", min_value=0, step=1, format="%d")
-
-    # Bild einfügen
-    with image_column:
-        st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png", caption="Bild aus einer URL", use_column_width=True)
-
-    # Timer starten
-    with main_column:
-        if st.button("Timer starten"):
-            run_timer(duration)
         
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
@@ -250,7 +219,7 @@ def main():
             """
             <style>
             [data-testid="stVerticalBlock"] > div:first-child {
-                background-color: #7FB5B5;
+                background-color: #CAC9E1;
                 padding: 10px;
                 border-radius: 5px;
             }
@@ -319,18 +288,6 @@ def main():
                         st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
         else:
             st.write("Keine Termine für diesen Tag.")
-
-   # Ändere die Hintergrundfarbe
-    st.markdown(
-        """
-        <style>
-        body {
-            background-color: #F7BFCB;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
     
 if __name__ == "__main__":
     main()
