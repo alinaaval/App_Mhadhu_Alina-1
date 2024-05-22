@@ -201,7 +201,7 @@ def main():
     # Platzieren des Bildes oben rechts
     col1, col2, col3 = st.columns([1, 1, 1])
     with col3:
-        st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png", caption="Bild aus einer URL")
+        st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png")
 
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
