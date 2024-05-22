@@ -203,20 +203,17 @@ def main():
     with col3:
         st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png")
     
-    # Füge der linken Spalte eine hellrosa Hintergrundfarbe hinzu
-    with col1:
-        st.markdown(
-            """
-            <style>
-            [data-testid="stVerticalBlock"] > div:first-child {
-                background-color: #ffe6e6;
-                padding: 10px;
-                border-radius: 5px;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
+    # Ändere die Hintergrundfarbe der linken Spalte
+    st.markdown(
+        """
+        <style>
+        .sidebar .sidebar-content {
+            background-color: #add8e6;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
     
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
