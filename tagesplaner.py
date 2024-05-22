@@ -212,6 +212,11 @@ def main():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col3:
         st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png")
+
+        # Platzieren des Bildes oben rechts
+    col1, col2, col3 = st.columns([2, 2, 2])
+    with col3:
+        st.image("https://i0.wp.com/www.additudemag.com/wp-content/uploads/2018/03/For-Parents_DTPC-Motivation_bored-boy-at-desk_ts-866103068-cropped.jpeg")
     
    # Füge der linken Spalte eine hellrosa Hintergrundfarbe hinzu
     with col1:
