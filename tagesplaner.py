@@ -217,7 +217,19 @@ def main():
             """,
             unsafe_allow_html=True
         )
-    
+
+        # Ändere die Hintergrundfarbe der gesamten App
+    st.markdown(
+        """
+        <style>
+        body {
+            background-color: #ffc0cb;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
 
