@@ -9,34 +9,6 @@ def get_db_connection():
     conn = sqlite3.connect('user_data.db')
     return conn, conn.cursor()
 
-# Tabelle für Benutzer erstellen, falls sie noch nicht existiert
-c.execute('''CREATE TABLE IF NOT EXISTS users
-             (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
-conn.commit()
-
-# Funktion zur Überprüfung, ob ein Benutzer bereits existiert
-def user_exists(username):
-    c.execute("SELECT * FROM users WHERE username=?", (username,))
-    return c.fetchone() is not None
-
-# Funktion zur Registrierung eines neuen Benutzers
-def register(username, password):
-    if not user_exists(username):
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
-        conn.commit()
-        return True
-    else:
-        return False
-
-# Funktion zur Überprüfung der Anmeldeinformationen
-def login(username, password):
-    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-    return c.fetchone() is not None
-
-# Funktion zum Ausloggen
-def logout():
-    st.session_state['authenticated'] = False
-
 # Tabellen für Benutzer und Kalendereinträge erstellen, falls sie noch nicht existieren
 def create_tables():
     conn, c = get_db_connection()
@@ -48,6 +20,39 @@ def create_tables():
     conn.close()
 
 create_tables()
+
+# Funktion zur Überprüfung, ob ein Benutzer bereits existiert
+def user_exists(username):
+    conn, c = get_db_connection()
+    c.execute("SELECT * FROM users WHERE username=?", (username,))
+    result = c.fetchone()
+    conn.close()
+    return result is not None
+
+# Funktion zur Registrierung eines neuen Benutzers
+def register(username, password):
+    if not user_exists(username):
+        conn, c = get_db_connection()
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        conn.close()
+        return True
+    else:
+        return False
+
+# Funktion zur Überprüfung der Anmeldeinformationen
+def login(username, password):
+    conn, c = get_db_connection()
+    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+    result = c.fetchone()
+    conn.close()
+    return result is not None
+
+# Funktion zum Ausloggen
+def logout():
+    st.session_state['authenticated'] = False
+    if 'username' in st.session_state:
+        del st.session_state['username']
         
 # Funktion zur Anzeige der Tagesansicht
 def show_day_view(date):
