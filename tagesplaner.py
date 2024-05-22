@@ -170,9 +170,6 @@ def main():
     if not st.session_state['authenticated']:
         st.title("Benutzerregistrierung und -anmeldung")
     
-# Bild hinzufügen
-        st.image("https://i0.wp.com/www.additudemag.com/wp-content/uploads/2018/03/For-Parents_DTPC-Motivation_bored-boy-at-desk_ts-866103068-cropped.jpeg")
-
         if st.checkbox("Registrieren"):
             # Benutzerregistrierung
             st.subheader("Registrierung")
