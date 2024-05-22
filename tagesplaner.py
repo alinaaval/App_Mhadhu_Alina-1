@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import calendar
 from datetime import datetime, timedelta
+
 import sqlite3
 
 # Verbindung zur SQLite-Datenbank herstellen (oder erstellen, falls nicht vorhanden)
@@ -114,16 +115,15 @@ def main():
                     if cols[calendar.weekday(year, month, day)].button(str(day)):
                         show_day_view(date)
 
-        # Previous and Next Month Buttons
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button("Vorheriger Monat"):
-                year, month = previous_month(year, month)
-                selected_date = datetime(year, month, 1)
-        with col3:
-            if st.button("Nächster Monat"):
-                year, month = next_month(year, month)
-                selected_date = datetime(year, month, 1)
+# Funktion zur Aufgabenhinzufügung
+def add_task(username, date, task):
+    c.execute("INSERT INTO tasks (username, date, task) VALUES (?, ?, ?)", (username, date, task))
+    conn.commit()
+
+# Funktion zur Terminhinzufügung
+def add_event(username, date, event):
+    c.execute("INSERT INTO events (username, date, event) VALUES (?, ?, ?)", (username, date, event))
+    conn.commit()
 
 if _name_ == "_main_":
     main()
