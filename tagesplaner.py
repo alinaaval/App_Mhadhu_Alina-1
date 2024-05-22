@@ -262,17 +262,17 @@ def main():
         else:
             st.write("Keine Termine für diesen Tag.")
 
- # Ändere die Hintergrundfarbe
-    st.markdown(
-        """
-        <style>
-        body {
-            background-color: #f0f2f6;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# Ändere die Hintergrundfarbe auf Pastelrosa
+st.markdown(
+    """
+    <style>
+    .reportview-container {
+        background: #f5dcd6; /* Pastelrosa */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 if __name__ == "__main__":
     main()
