@@ -154,18 +154,6 @@ def show_current_day_view():
 
 # Streamlit-Anwendung
 def main():
-    # Ändere die Hintergrundfarbe auf Pastelrosa
-    st.markdown(
-        """
-        <style>
-        .reportview-container {
-            background: #f5dcd6; /* Pastelrosa */
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
     if 'authenticated' not in st.session_state:
         st.session_state['authenticated'] = False
 
@@ -209,6 +197,9 @@ def main():
     else:
         st.error("Fehler: Benutzername nicht gefunden. Bitte erneut anmelden.")
         return
+    
+    # Beispiel für das Hinzufügen eines Bildes aus einer URL
+    st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png", caption="Bild aus einer URL")
 
     # Aktuelle Tagesansicht anzeigen
     show_current_day_view()
@@ -254,7 +245,7 @@ def main():
             else:
                 st.error("Bitte eine Terminbeschreibung eingeben.")
 
-        # Events für das ausgewählte Datum abrufen und anzeigen
+        # Events für den ausgewählten Tag abrufen und anzeigen
         st.subheader("Termine für den ausgewählten Tag")
         events = show_events(username, selected_date_str)
         if events:
@@ -270,6 +261,18 @@ def main():
                         st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
         else:
             st.write("Keine Termine für diesen Tag.")
+
+ # Ändere die Hintergrundfarbe
+    st.markdown(
+        """
+        <style>
+        body {
+            background-color: #f0f2f6;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 if __name__ == "__main__":
     main()
