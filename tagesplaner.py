@@ -158,7 +158,11 @@ def show_current_day_view():
                 for event in events:
                     priority = event["priority"]
                     priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
-                    st.write(f"- {event['event']} (Priorität: {priority_text})")
+                    checked = st.checkbox(event['event'], key=event['id'])
+                    if checked:
+                        st.write(f"- ~~{event['event']}~~ (Priorität: {priority_text})")
+                    else:
+                        st.write(f"- {event['event']} (Priorität: {priority_text})")
             else:
                 st.write("Keine Termine für heute.")
 
