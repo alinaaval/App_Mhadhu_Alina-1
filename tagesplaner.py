@@ -33,7 +33,7 @@ def user_exists(username):
 def register(username, password):
     if not user_exists(username):
         conn, c = get_db_connection()
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         conn.close()
         return True
