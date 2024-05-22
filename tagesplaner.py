@@ -279,17 +279,17 @@ def main():
         else:
             st.write("Keine Termine für diesen Tag.")
 
-      # Ändere die Hintergrundfarbe der gesamten App
-    st.markdown(
-        """
-        <style>
-        body {
-            background-color: #F2CEE3;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    
+# Ändere die Hintergrundfarbe der gesamten App
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #F1CFE1 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 if __name__ == "__main__":
     main()
