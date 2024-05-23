@@ -10,7 +10,7 @@ page_bg = """
 <style>
 .stApp {
     background-color: #CAC9E1;
-    color: black;
+    color: White;
 }
 div[data-testid="stText"] {
     color: white;
