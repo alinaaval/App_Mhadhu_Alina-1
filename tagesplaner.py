@@ -319,5 +319,5 @@ def main():
         else:
             st.write("Keine Termine für diesen Tag.")
     
-if _name_ == "_main_":
+if __name__ == "_main_":
     main()
