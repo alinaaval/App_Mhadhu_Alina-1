@@ -198,17 +198,6 @@ def main():
                 else:
                     st.error("Ungültige Anmeldeinformationen!")
         return
-        
-    # CSS für die Hintergrundfarbe direkt im Python-Code
-    page_bg_img = '''
-    <style>
-    body {
-        background-color: #ADD8E6;  /* Hier kannst du jede gewünschte Farbe einstellen */
-    }
-    </style>
-    '''
-
-    st.markdown(page_bg_img, unsafe_allow_html=True)
     
     st.title("To-do Liste")
 
