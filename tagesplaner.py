@@ -13,13 +13,13 @@ page_bg = """
     color: White;
 }
 div[data-testid="stText"] {
-    color: white;
+    color: black;
 }
 div[data-testid="stMarkdownContainer"] p {
-    color: white;
+    color: black;
 }
 h1, h2, h3, h4, h5, h6 {
-    color: white;
+    color: black;
 }
 .stButton > button {
     color: white !important;
