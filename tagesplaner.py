@@ -198,7 +198,19 @@ def main():
                 else:
                     st.error("Ungültige Anmeldeinformationen!")
         return
-
+        
+# CSS für die Hintergrundfarbe
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: red;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+    
     st.title("To-do Liste")
 
     if st.button("Ausloggen"):
