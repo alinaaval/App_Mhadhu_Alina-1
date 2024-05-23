@@ -9,7 +9,7 @@ import time
 page_bg = """
 <style>
 .stApp {
-    background-color: #392981;
+    background-color: #CAC9E1;
     color: white;
 }
 div[data-testid="stText"] {
