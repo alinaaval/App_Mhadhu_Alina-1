@@ -16,10 +16,10 @@ div[data-testid="stText"] {
     color: black;
 }
 div[data-testid="stMarkdownContainer"] p {
-    color: black;
+    color: White;
 }
 h1, h2, h3, h4, h5, h6 {
-    color: white;
+    color: Black;
 }
 .stButton > button {
     color: white !important;
