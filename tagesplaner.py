@@ -284,7 +284,7 @@ for week in cal:
                 has_medium_priority_event = any(event["priority"] == 2 for event in events)
                 if has_high_priority_event:
                     button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
-                elif has_medium_priority_event:
+                else has_medium_priority_event:
                     button_text += " 🟠"  # Symbol 🟠 für mittlere Priorität hinzufügen
                 else:
                     button_text += " 🔵"  # Symbol 🔵 für niedrige Priorität hinzufügen
