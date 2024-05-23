@@ -5,6 +5,32 @@ from datetime import datetime
 import sqlite3
 import time
 
+# CSS-Styles für den Hintergrund und die Schriftfarbe
+page_bg = """
+<style>
+.stApp {
+    background-color: #392981;
+    color: white;
+}
+div[data-testid="stText"] {
+    color: white;
+}
+div[data-testid="stMarkdownContainer"] p {
+    color: white;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: white;
+}
+.stButton > button {
+    color: white !important;
+    background-color: black !important;
+}
+</style>
+"""
+
+# Wende die CSS-Styles an
+st.markdown(page_bg, unsafe_allow_html=True)
+
 # Funktion zur Verbindung mit der SQLite-Datenbank
 def get_db_connection():
     conn = sqlite3.connect('user_data.db')
