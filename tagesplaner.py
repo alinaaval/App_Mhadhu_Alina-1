@@ -13,7 +13,7 @@ page_bg = """
     color: black;
 }
 div[data-testid="stText"] {
-    color: White;
+    color: black;
 }
 div[data-testid="stMarkdownContainer"] p {
     color: White;
