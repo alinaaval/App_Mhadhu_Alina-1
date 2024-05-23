@@ -16,7 +16,7 @@ div[data-testid="stText"] {
     color: black;
 }
 div[data-testid="stMarkdownContainer"] p {
-    color: White;
+    color: black;
 }
 h1, h2, h3, h4, h5, h6 {
     color: Black;
