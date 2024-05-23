@@ -249,7 +249,7 @@ def main():
             """
             <style>
             [data-testid="stVerticalBlock"] > div:first-child {
-                background-color: #CAC9E1;
+                background-color: #D1D3E7;
                 padding: 10px;
                 border-radius: 5px;
             }
