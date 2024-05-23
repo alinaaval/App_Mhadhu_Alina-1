@@ -268,31 +268,28 @@ def main():
         year, month, day = selected_date.year, selected_date.month, selected_date.day
         selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-# Show calendar
-st.subheader(calendar.month_name[month] + " " + str(year))
-cal = calendar.monthcalendar(year, month)
-for week in cal:
-    cols = st.columns(7)
-    for day in week:
-        if day != 0:
-            date = datetime(year, month, day).strftime("%Y-%m-%d")
-            events = show_events(username, date)
-            button_text = str(day)
-            if events:
-                # Überprüfen, ob eine Veranstaltung mit hoher Priorität vorhanden ist
-                has_high_priority_event = any(event["priority"] == 3 for event in events)
-                has_medium_priority_event = any(event["priority"] == 2 for event in events)
-                if has_high_priority_event:
-                    button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
-                else has_medium_priority_event:
-                    button_text += " 🟠"  # Symbol 🟠 für mittlere Priorität hinzufügen
-                else:
-                    button_text += " 🔵"  # Symbol 🔵 für niedrige Priorität hinzufügen
-                if cols[calendar.weekday(year, month, day)].button(button_text):
-                    show_day_view(date)
-            else:
-                if cols[calendar.weekday(year, month, day)].button(button_text):
-                    show_day_view(date)
+    # Show calendar
+        st.subheader(calendar.month_name[month] + " " + str(year))
+        cal = calendar.monthcalendar(year, month)
+        for week in cal:
+            cols = st.columns(7)
+            for day in week:
+                if day != 0:
+                    date = datetime(year, month, day).strftime("%Y-%m-%d")
+                    events = show_events(username, date)
+                    button_text = str(day)
+                    if events:
+                        # Überprüfen, ob eine Veranstaltung mit hoher Priorität vorhanden ist
+                        has_high_priority_event = any(event["priority"] == 3 for event in events)
+                        if has_high_priority_event:
+                            button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
+                        else:
+                            button_text += " 🔵"
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
+                    else:
+                        if cols[calendar.weekday(year, month, day)].button(button_text):
+                            show_day_view(date)
 
         # Event hinzufügen
         st.subheader("Neuen Termin hinzufügen")
