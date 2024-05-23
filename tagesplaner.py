@@ -10,7 +10,7 @@ page_bg = """
 <style>
 .stApp {
     background-color: #CAC9E1;
-    color: White;
+    color: Black;
 }
 div[data-testid="stText"] {
     color: Black;
@@ -19,7 +19,7 @@ div[data-testid="stMarkdownContainer"] p {
     color: Black;
 }
 h1, h2, h3, h4, h5, h6 {
-    color: White;
+    color: Black;
 }
 .stButton > button {
     color: white !important;
