@@ -161,16 +161,7 @@ def delete_event(event_id):
     except sqlite3.Error as e:
         st.error(f"Fehler beim Löschen des Termins: {e}")
         return False
-def main():
-    st.title("Kalender App mit Timer")
 
-    if 'authenticated' not in st.session_state:
-        st.session_state['authenticated'] = False
-
-    if not st.session_state['authenticated']:
-        st.title("Benutzerregistrierung und -anmeldung")
-        # Code für Registrierung und Anmeldung hier ...
-        
 # Funktion zur Anzeige der aktuellen Tagesansicht
 def show_current_day_view():
     current_date = datetime.today().strftime("%Y-%m-%d")
@@ -243,7 +234,7 @@ def main():
     with col3:
         st.image("https://cdn.icon-icons.com/icons2/2416/PNG/512/heart_list_task_to_do_icon_146658.png")
     
-   # Füge der linken Spalte eine hellrosa Hintergrundfarbe hinzu
+    # Füge der linken Spalte eine hellrosa Hintergrundfarbe hinzu
     with col1:
         st.markdown(
             """
@@ -281,10 +272,13 @@ def main():
                     if events:
                         # Überprüfen, ob eine Veranstaltung mit hoher Priorität vorhanden ist
                         has_high_priority_event = any(event["priority"] == 3 for event in events)
+                        has_medium_priority_event = any(event["priority"] == 2 for event in events)
                         if has_high_priority_event:
                             button_text += " 🔴"  # Symbol 🔴 für hohe Priorität hinzufügen
+                        elif has_medium_priority_event:
+                            button_text += " 🟠"  # Symbol 🟠 für mittlere Priorität hinzufügen
                         else:
-                            button_text += " 🔵"
+                            button_text += " 🔵"  # Symbol 🔵 für niedrige Priorität hinzufügen
                         if cols[calendar.weekday(year, month, day)].button(button_text):
                             show_day_view(date)
                     else:
@@ -318,6 +312,6 @@ def main():
                         st.error(f"Fehler beim Löschen des Termins mit ID {event_id}.")
         else:
             st.write("Keine Termine für diesen Tag.")
-    
-if __name__ == "_main_":
-    main()
+
+if __name__ == "__main__":
+    main()
