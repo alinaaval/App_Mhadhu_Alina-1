@@ -19,7 +19,7 @@ div[data-testid="stMarkdownContainer"] p {
     color: black;
 }
 h1, h2, h3, h4, h5, h6 {
-    color: black;
+    color: white;
 }
 .stButton > button {
     color: white !important;
