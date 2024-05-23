@@ -186,7 +186,7 @@ def show_current_day_view():
                     priority_text = "Niedrig" if priority == 1 else "Mittel" if priority == 2 else "Hoch"
                     checked = st.checkbox(event['event'], key=event['id'])
                     if checked:
-                        st.write(f"- ~~{event['event']}~~ (Priorität: {priority_text})")
+                        st.write(f"- ~{event['event']}~ (Priorität: {priority_text})")
                     else:
                         st.write(f"- {event['event']} (Priorität: {priority_text})")
             else:
@@ -224,7 +224,7 @@ def main():
                 else:
                     st.error("Ungültige Anmeldeinformationen!")
         return
-    
+
     st.title("To-do Liste")
 
     if st.button("Ausloggen"):
@@ -268,7 +268,7 @@ def main():
         year, month, day = selected_date.year, selected_date.month, selected_date.day
         selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-    # Show calendar
+        # Show calendar
         st.subheader(calendar.month_name[month] + " " + str(year))
         cal = calendar.monthcalendar(year, month)
         for week in cal:
@@ -319,5 +319,5 @@ def main():
         else:
             st.write("Keine Termine für diesen Tag.")
     
-if __name__ == "__main__":
-    main()
+if _name_ == "_main_":
+    main()
